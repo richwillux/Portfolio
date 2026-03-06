@@ -108,6 +108,7 @@ nav {
   background-color: var(--orange-tint);
   position:relative; 
  border-bottom: 1px solid var(--orange);
+ transition: background-color 0.3s ease;
 }
 
 .nav-logo {
@@ -117,6 +118,7 @@ nav {
 .nav-logo img {
   height: 2.5rem;
   width: auto;
+  transition: filter 0.3s ease
 }
 
 .nav-links {
@@ -124,13 +126,14 @@ nav {
   list-style: none;
   gap: 2rem;
   align-items: center;
+  transition: background-color 0.3s ease;
 }
 
 .nav-links a:not(.small-button) {
   text-decoration: none;
   color: var(--orange);
   font-size: 1rem;
-  transition: color 0.2s ease;
+  transition: color 0.3s ease;
 }
 
 .nav-links a:not(.small-button):hover {
@@ -271,25 +274,31 @@ nav {
   }
 
   .nav-links {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: var(--orange-tint);
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1.5rem 4rem 2.5rem;
-    gap: 1.5rem;
-    box-shadow: 0 8px 16px var(--warm-shadow);
+     display: flex;
+     flex-direction: column;
+     align-items: flex-start;
+     position: absolute;
+     top: 100%;
+     left: 0;
+     right: 0;
+     padding: 1.5rem 4rem 2.5rem;
+     gap: 1.5rem;
+     background-color: var(--orange-tint);
+     opacity: 0;
+     pointer-events: none;
+     transform: translateY(-8px);
+     transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
   .nav-links.is-open {
-    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
   }
 
    nav.is-open {
     background-color: var(--orange);
+    border-bottom: none;
   }
 
   nav.is-open .nav-toggle span {
@@ -302,6 +311,7 @@ nav {
 
   nav.is-open .nav-links {
   background-color: var(--orange);
+  box-shadow: 0 8px 8px var(--orange-shadow);
 }
 nav.is-open .small-button {
   color: var(--white) !important;
