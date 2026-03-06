@@ -288,6 +288,18 @@ nav {
     display: flex;
   }
 
+   nav.is-open {
+    background-color: var(--orange);
+  }
+
+  nav.is-open .nav-toggle span {
+    background-color: var(--white);
+  }
+
+  nav.is-open .nav-links a {
+    color: var(--white);
+  }
+
    .small-button {
     background-color: transparent;
     color: var(--orange) !important;
