@@ -1,27 +1,38 @@
-/* Variables */
+/* ============================================
+   VARIABLES
+   Design tokens — update here to change 
+   colours, fonts and sizes globally
+   ============================================ */
+
 :root {
-  --orange: #B24A00;
-  --orange-tint: #FFF3EB;
-  --orange-dark:#994000;
-  --text-dark: #1A1A1A; /* body text on white */
-  --text-warm:#2E1F14; /* display text on warm/tinted backgrounds */
-  --light-grey:#F8F8F8;/* soft brackground on logo tiles */
-  --white:#ffffff;
-  --warm-shadow: #E0D5C880;
-  --orange-shadow:#B24A0080;
+  --orange: #B24A00;             /* brand orange for CTAs, links etc. */
+  --orange-tint: #FFF3EB;        /* light warm background for hero and nav */
+  --orange-dark: #994000;        /* darker orange for hover states */
+  --text-dark: #1A1A1A;          /* body text on white */
+  --text-warm: #2E1F14;          /* display text on warm/tinted backgrounds */
+  --light-grey: #F8F8F8;         /* soft background on logo tiles */
+  --white: #ffffff;
+  --warm-shadow: #E0D5C880;      /* warm beige shadow at 50% opacity used on cards*/
+  --orange-shadow: #B24A0080;    /* orange shadow at 50% opacity for open nav menu */
   --font-body: 'Inter', sans-serif;
   --font-display: 'Plus Jakarta Sans', sans-serif;
-  --text-xs:   0.75rem;   /* 12px */
-  --text-sm:   0.875rem;  /* 14px */
-  --text-base: 1rem;      /* 16px */
-  --text-lg:   1.25rem;   /* 20px */
-  --text-xl:   1.5rem;    /* 24px */
-  --text-2xl:  2rem;      /* 32px */
-  --text-3xl:  2.5rem;    /* 40px */
-  --text-display:  3.25rem;    /* 52px */
-  --text-4xl:  3.5rem;    /* 56px */
+  --text-xs:      0.75rem;       /* 12px */
+  --text-sm:      0.875rem;      /* 14px */
+  --text-base:    1rem;          /* 16px */
+  --text-lg:      1.25rem;       /* 20px */
+  --text-xl:      1.5rem;        /* 24px */
+  --text-2xl:     2rem;          /* 32px */
+  --text-3xl:     2.5rem;        /* 40px */
+  --text-display: 3.25rem;       /* 52px — hero display size */
+  --text-4xl:     3.5rem;        /* 56px */
 }
-/* Fonts */
+
+/* ============================================
+   FONTS
+   Self-hosted fonts loaded via @font-face
+   Each weight needs its own rule
+   ============================================ */
+
 @font-face {
   font-family: 'Inter';
   src: url('assets/fonts/inter-latin-200-normal.woff2') format('woff2');
@@ -71,56 +82,82 @@
   font-style: normal;
 }
 
-/* Reset */
+/* ============================================
+   RESET
+   Removes default browser spacing and sets 
+   box-sizing so padding doesn't affect width
+   ============================================ */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* 3. Typography */
+/* ============================================
+   TYPOGRAPHY
+   Base text styles that cascade down the page
+   ============================================ */
 
+/* Sets the default font and colour for all text */
 body {
   font-family: var(--font-body);
   color: var(--text-dark);
 }
 
+/* Large display text used in hero section —
+   reusable class so it can be applied to any element */
 .display {
-    font-family: var(--font-display);
-  font-size: var(--text-display); /*52px*/
+  font-family: var(--font-display);
+  font-size: var(--text-display); /* 52px */
   line-height: 1.44;
   font-weight: 200;
   color: var(--text-warm);
 }
 
+/* Orange accent colour for highlighted words in display copy */
 .highlight {
   color: var(--orange);
 }
 
+/* Adds a small gap below all underlined links globally */
 a {
   text-underline-offset: 0.25rem;
 }
 
-/* 4. Layout */
+/* ============================================
+   LAYOUT
+   Structural rules for page sections and nav
+   ============================================ */
+
+/* Full width nav bar — position relative allows the
+   small screen dropdown to be positioned relative to it */
 
 nav {
   padding: 1.25rem 1.5rem;
   background-color: var(--orange-tint);
-  position:relative; 
- border-bottom: 1px solid var(--orange);
- transition: background-color 0.3s ease;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid var(--orange);
+  /* Smooth background colour transition when mobile menu opens */
+  transition: background-color 0.3s ease;
+  /* z-index keeps the nav above other content as you scroll */
+  z-index: 100;
 }
 
+/* Container for the logo image */
 .nav-logo {
   color: var(--orange);
 }
 
+/* Controls logo size and allows filter transition
+   for white logo swap when mobile menu opens */
 .nav-logo img {
   height: 2.5rem;
   width: auto;
-  transition: filter 0.3s ease
+  transition: filter 0.3s ease;
 }
 
+/* Desktop nav links — horizontal row with gap between items */
 .nav-links {
   display: flex;
   list-style: none;
@@ -129,6 +166,7 @@ nav {
   transition: background-color 0.3s ease;
 }
 
+/* Nav link styles — orange colour with smooth colour transition for hover */
 .nav-links a:not(.small-button) {
   text-decoration: none;
   color: var(--orange);
@@ -136,11 +174,14 @@ nav {
   transition: color 0.3s ease;
 }
 
+/* Hover state — darker orange with underline */
 .nav-links a:not(.small-button):hover {
   color: var(--orange-dark);
   text-decoration: underline;
 }
 
+/* Flex container inside nav that pushes logo left
+   and links right using space-between */
 .nav-inner {
   display: flex;
   justify-content: space-between;
@@ -148,6 +189,8 @@ nav {
   width: 100%;
 }
 
+/* Hamburger button — hidden on desktop, 
+   shown via media query on mobile */
 .nav-toggle {
   display: none;
   flex-direction: column;
@@ -158,47 +201,66 @@ nav {
   padding: 0.5rem;
 }
 
+/* The three lines of the hamburger icon */
 .nav-toggle span {
   display: block;
   width: 30px;
   height: 3px;
   background-color: var(--orange);
+  /* transition: all allows colour, transform and opacity 
+     to all animate when the menu opens and closes */
   transition: all 0.3s ease;
 }
 
+/* Hover state — lines turn darker orange */
 .nav-toggle:hover span {
   background-color: var(--orange-dark);
 }
 
+/* When menu is open — first line rotates to form top of X
+   translateY moves it down to meet the middle before rotating */
 .nav-toggle.is-open span:nth-child(1) {
   transform: translateY(9px) rotate(45deg);
 }
 
+/* Middle line fades out */
 .nav-toggle.is-open span:nth-child(2) {
   opacity: 0;
 }
 
+/* Third line rotates to form bottom of X
+   translateY moves it up to meet the middle before rotating */
 .nav-toggle.is-open span:nth-child(3) {
   transform: translateY(-9px) rotate(-45deg);
 }
 
+/* Introduces shadow under nav bar when the page scrolls */
+nav.is-scrolled {
+  box-shadow: 0 2px 12px var(--warm-shadow);
+}
+
+/* Hero background — padding handled by .section */
 .hero {
   background-color: var(--orange-tint);
 }
 
+/* Gap between h1 and paragraph in hero */
 .hero h1 {
   margin-bottom: 1rem;
 }
 
+/* Constrains content width and centres it on wide screens */
 .container {
   max-width: 1100px;
   margin: 0 auto;
 }
 
+/* Default padding for all page sections */
 .section {
   padding: 2rem 2.5rem 3.75rem;
 }
 
+/* 6 column grid for logo tiles on desktop */
 .logo-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -207,8 +269,12 @@ nav {
   padding: 0 2rem;
 }
 
-/* 5. Components */
+/* ============================================
+   COMPONENTS
+   Individual UI elements
+   ============================================ */
 
+/* Filled orange pill button — used as primary CTA in nav */
 .small-button {
   background-color: var(--orange);
   color: var(--white);
@@ -219,10 +285,13 @@ nav {
   transition: background-color 0.2s ease;
 }
 
+/* Hover state — darker orange background */
 .small-button:hover {
   background-color: var(--orange-dark);
 }
 
+/* Individual logo tile — flex centres the logo image
+   position relative allows tooltip to be positioned absolutely */
 .logo-tile {
   display: flex;
   position: relative;
@@ -230,10 +299,12 @@ nav {
   justify-content: center;
   padding: 2rem 1.5rem;
   border-radius: 0.5rem;
-  background-color: var(--light-grey)   ;
+  background-color: var(--light-grey);
   box-shadow: 0 2px 12px var(--warm-shadow);
 }
 
+/* Logo image — object-fit contain ensures it scales 
+   without distortion regardless of aspect ratio */
 .logo-tile img {
   max-width: 100%;
   height: 4rem;
@@ -241,11 +312,15 @@ nav {
   object-fit: contain;
 }
 
+/* Tooltip — reads from data-name attribute on the tile
+   hidden by default, positioned below the tile
+   pointer-events none stops it interfering with mouse events */
 .logo-tile::after {
   content: attr(data-name);
   position: absolute;
   bottom: -1.5rem;
   left: 50%;
+  /* pulls the tooltip back to centre over the tile */
   transform: translateX(-50%);
   font-size: var(--text-sm);
   font-weight: 700;
@@ -256,99 +331,129 @@ nav {
   pointer-events: none;
 }
 
+/* Tooltip fades in on hover */
 .logo-tile:hover::after {
   opacity: 1;
 }
 
-/* 6. Media queries */
+/* ============================================
+   MEDIA QUERIES
+   Ordered largest to smallest breakpoint
+   Each breakpoint triggered by content needs
+   ============================================ */
 
+/* Grid drops to 4 columns when viewport hits container width */
 @media (max-width: 1100px) {
   .logo-grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
+/* Nav switches to hamburger menu below 1024px */
 @media (max-width: 1024px) {
+
+  /* Show the hamburger button */
   .nav-toggle {
     display: flex;
   }
 
+  /* Mobile nav dropdown — absolutely positioned below the nav bar
+     opacity and transform used instead of display none/flex
+     so the transition can animate smoothly */
   .nav-links {
-     display: flex;
-     flex-direction: column;
-     align-items: flex-start;
-     position: absolute;
-     top: 100%;
-     left: 0;
-     right: 0;
-     padding: 1.5rem 4rem 2.5rem;
-     gap: 1.5rem;
-     background-color: var(--orange-tint);
-     opacity: 0;
-     pointer-events: none;
-     transform: translateY(-8px);
-     transition: opacity 0.3s ease, transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: absolute;
+    top: 100%;           /* sits directly below the nav bar */
+    left: 0;
+    right: 0;
+    padding: 1.5rem 4rem 2.5rem;
+    gap: 1.5rem;
+    background-color: var(--orange-tint);
+    opacity: 0;          /* hidden by default */
+    pointer-events: none; /* non-interactive when hidden */
+    transform: translateY(-8px); /* slightly raised when hidden */
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
+  /* When menu opens — fades in and slides down to natural position */
   .nav-links.is-open {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
   }
 
-   nav.is-open {
+  /* Nav bar turns orange when menu is open */
+  nav.is-open {
     background-color: var(--orange);
-    border-bottom: none;
+    border-bottom: none; /* removes the border between nav and menu */
   }
 
+  /* Hamburger lines turn white when menu is open */
   nav.is-open .nav-toggle span {
     background-color: var(--white);
   }
 
+  /* Nav links turn white when menu is open */
   nav.is-open .nav-links a {
     color: var(--white);
   }
 
+  /* Menu background turns orange and adds shadow below */
   nav.is-open .nav-links {
-  background-color: var(--orange);
-  box-shadow: 0 8px 8px var(--orange-shadow);
-}
-nav.is-open .small-button {
-  color: var(--white) !important;
-}
+    background-color: var(--orange);
+    box-shadow: 0 8px 8px var(--orange-shadow);
+  }
 
-nav.is-open .nav-logo img {
-  filter: brightness(0) invert(1);
-}
+  /* Get in touch turns white when menu is open
+     !important needed to override the desktop button styles */
+  nav.is-open .small-button {
+    color: var(--white) !important;
+  }
 
-   .small-button {
+  /* Logo turns white when menu is open
+     brightness(0) makes it black, invert(1) flips it to white */
+  nav.is-open .nav-logo img {
+    filter: brightness(0) invert(1);
+  }
+
+  /* On mobile the button loses its pill styling
+     and becomes a plain text link like the other nav items
+     !important needed to override the desktop button styles */
+  .small-button {
     background-color: transparent;
     color: var(--orange) !important;
     padding: 0;
     border-radius: 0;
   }
 
+  /* Hover state for plain text button on mobile */
   .small-button:hover {
     background-color: transparent;
     color: var(--orange-dark) !important;
     text-decoration: underline;
   }
 
-    .display {
-    font-size: var(--text-3xl); /* 40px */ /* Drop display size on mid screens */
+  /* Display text drops to 40px on mid screens */
+  .display {
+    font-size: var(--text-3xl); /* 40px */
     line-height: 1.4;
   }
 
-    .hero {
+  /* Hero padding reduced on smaller screens */
+  .hero {
     padding: 2rem 1.5rem 3.75rem;
   }
 
+  /* Container gets side padding on smaller screens
+     to stop content touching the edges */
   .container {
     padding: 0 1.5rem;
   }
-
 }
 
+/* Grid drops to 3 columns below 768px */
 @media (max-width: 768px) {
   .logo-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -356,22 +461,22 @@ nav.is-open .nav-logo img {
   }
 }
 
+/* Section padding reduces and grid drops to 2 columns below 650px */
 @media (max-width: 650px) {
- 
-    .section {
+  .section {
     padding: 2rem 1.5rem 3.75rem;
   }
-  
+
   .logo-grid {
     grid-template-columns: repeat(2, 1fr);
     padding: 0 1rem;
   }
 }
 
+/* Display text drops further to 32px on small screens */
 @media (max-width: 550px) {
- 
-   .display {
-    font-size: var(--text-2xl); /* 32px */ /* Drop further on small screens */
+  .display {
+    font-size: var(--text-2xl); /* 32px */
     line-height: 1.4;
   }
 }
