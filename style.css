@@ -300,6 +300,17 @@ nav {
     color: var(--white);
   }
 
+  nav.is-open .nav-links {
+  background-color: var(--orange);
+}
+nav.is-open .small-button {
+  color: var(--white) !important;
+}
+
+nav.is-open .nav-logo img {
+  filter: brightness(0) invert(1);
+}
+
    .small-button {
     background-color: transparent;
     color: var(--orange) !important;
