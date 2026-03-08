@@ -702,9 +702,7 @@ nav.is-scrolled {
   font-size: var(--text-xl); /* 24px */
 }
 
-  .section {
-    padding: 1.5rem 1rem 2.5rem;
-  }
+
 
    .logo-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -737,6 +735,10 @@ nav.is-scrolled {
   .logo-grid {
     grid-template-columns: repeat(2, 1fr);
     
+  }
+
+    .section {
+    padding: 1.5rem 1rem 2.5rem;
   }
 }
 
