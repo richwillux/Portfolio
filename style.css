@@ -200,7 +200,7 @@ a {
   color: var(--orange);
 }
 
-/* Reusable medium heading — 24px, used for sub headers 
+/* Reusable medium heading — 32px, used for sub headers 
    and any other headings across the site */
 .heading-lg {
   font-size: var(--text-2xl); /* 32px */
@@ -697,12 +697,6 @@ nav.is-scrolled {
 
 /* Grid drops to 3 columns below 768px */
 @media (max-width: 768px) {
-
-  .heading-lg {
-  font-size: var(--text-xl); /* 24px */
-}
-
-
 
    .logo-grid {
     grid-template-columns: repeat(3, 1fr);
