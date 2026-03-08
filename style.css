@@ -742,7 +742,7 @@ nav.is-scrolled {
 @media (max-width: 550px) {
 
   .heading-lg{
-    font: var(--text-xxl);
+    font-size: var(--text-xxl);
   }
   .display {
     font-size: var(--text-2xl);
