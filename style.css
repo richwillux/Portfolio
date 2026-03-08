@@ -706,7 +706,7 @@ nav.is-scrolled {
 
    .logo-grid {
     grid-template-columns: repeat(3, 1fr);
-    padding: 0;
+    padding: 0 1rem;
   }
 
   .case-study-card {
