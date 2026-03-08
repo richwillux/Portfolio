@@ -5,26 +5,43 @@
    ============================================ */
 
 :root {
-  --orange: #B24A00;             /* brand orange for CTAs, links etc. */
-  --orange-tint: #FFF3EB;        /* light warm background for hero and nav */
-  --orange-dark: #994000;        /* darker orange for hover states */
-  --text-dark: #1A1A1A;          /* body text on white */
-  --text-warm: #2E1F14;          /* display text on warm/tinted backgrounds */
-  --light-grey: #F8F8F8;         /* soft background on logo tiles */
+  --orange: #B24A00;
+  /* brand orange for CTAs, links etc. */
+  --orange-tint: #FFF3EB;
+  /* light warm background for hero and nav */
+  --orange-dark: #994000;
+  /* darker orange for hover states */
+  --text-dark: #1A1A1A;
+  /* body text on white */
+  --text-warm: #2E1F14;
+  /* display text on warm/tinted backgrounds */
+  --light-grey: #F8F8F8;
+  /* soft background on logo tiles */
   --white: #ffffff;
-  --warm-shadow: #E0D5C880;      /* warm beige shadow at 50% opacity used on cards*/
-  --orange-shadow: #B24A0080;    /* orange shadow at 50% opacity for open nav menu */
+  --warm-shadow: #E0D5C880;
+  /* warm beige shadow at 50% opacity used on cards*/
+  --orange-shadow: #B24A0080;
+  /* orange shadow at 50% opacity for open nav menu */
   --font-body: 'Inter', sans-serif;
   --font-display: 'Plus Jakarta Sans', sans-serif;
-  --text-xs:      0.75rem;       /* 12px */
-  --text-sm:      0.875rem;      /* 14px */
-  --text-base:    1rem;          /* 16px */
-  --text-lg:      1.25rem;       /* 20px */
-  --text-xl:      1.5rem;        /* 24px */
-  --text-2xl:     2rem;          /* 32px */
-  --text-3xl:     2.5rem;        /* 40px */
-  --text-display: 3.25rem;       /* 52px — hero display size */
-  --text-4xl:     3.5rem;        /* 56px */
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.25rem;
+  /* 20px */
+  --text-xl: 1.5rem;
+  /* 24px */
+  --text-2xl: 2rem;
+  /* 32px */
+  --text-3xl: 2.5rem;
+  /* 40px */
+  --text-display: 3.25rem;
+  /* 52px — hero display size */
+  --text-4xl: 3.5rem;
+  /* 56px */
 }
 
 /* ============================================
@@ -98,20 +115,30 @@
    Base text styles that cascade down the page
    ============================================ */
 
+
+
+/* Reusable small text style for tags and labels */
+.caption {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+/* Icon inside a tag — sized to match the text height */
+.tag img {
+  height: var(var(--text-sm));
+  width: auto;
+}
+
 /* Sets the default font and colour for all text */
 body {
   font-family: var(--font-body);
   color: var(--text-dark);
 }
 
-/* Large display text used in hero section —
-   reusable class so it can be applied to any element */
-.display {
-  font-family: var(--font-display);
-  font-size: var(--text-display); /* 52px */
-  line-height: 1.44;
-  font-weight: 200;
-  color: var(--text-warm);
+p {
+  max-width: 52ch;
+  line-height: 1.8;
 }
 
 /* Orange accent colour for highlighted words in display copy */
@@ -122,6 +149,75 @@ body {
 /* Adds a small gap below all underlined links globally */
 a {
   text-underline-offset: 0.25rem;
+}
+
+/* text links used for cards and read more CTAs */
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: auto;
+  gap: 0.375rem;
+  align-self: flex-end;
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--orange);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.text-link img {
+  height: 1rem;
+  width: auto;
+  min-width: 0.5rem;
+}
+
+/* Hover state — darker orange */
+.text-link:hover {
+  color: var(--orange-dark);
+}
+
+.text-link-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 1rem 2rem 0 0;
+}
+
+/* Small heading for names */
+.heading-sm {
+  font-size: var(--text-base);
+  /* 16px */
+  font-weight: 600;
+  color: var(--text-warm);
+}
+
+/* Reusable medium heading — 24px, used for card titles 
+   and any other mid-level headings across the site */
+.heading-md {
+  font-size: var(--text-xl);
+  /* 24px */
+  font-weight: 200;
+  color: var(--orange);
+}
+
+/* Reusable medium heading — 24px, used for sub headers 
+   and any other headings across the site */
+.heading-lg {
+  font-size: var(--text-2xl);
+  /* 32px */
+  font-weight: 200;
+  color: var(--text-dark);
+}
+
+/* Large display text used in hero section —
+   reusable class so it can be applied to any element */
+.display {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  /* 52px */
+  line-height: 1.44;
+  font-weight: 200;
+  color: var(--text-warm);
 }
 
 /* ============================================
@@ -269,6 +365,13 @@ nav.is-scrolled {
   padding: 0 2rem;
 }
 
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 2rem 2rem 0 2rem;
+}
+
 /* ============================================
    COMPONENTS
    Individual UI elements
@@ -336,6 +439,118 @@ nav.is-scrolled {
   opacity: 1;
 }
 
+/* Case study card — flex layout with image left and content right
+   overflow hidden ensures the image respects the border radius */
+.case-study-card {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  overflow: hidden;
+  margin: 2rem 2rem 0 2rem;
+  min-width: 300px;
+  border-bottom: 3px solid var(--orange);
+  box-shadow: 0 2px 12px var(--warm-shadow);
+}
+
+/* Image container — fixed at 35% of card width
+   flex: 0 0 35% means don't grow, don't shrink, stay at 35% */
+.case-study-image {
+  flex: 0 0 35%;
+  overflow: stretch;
+}
+
+/* Image fills the container completely
+   object-fit cover crops rather than distorts if aspect ratio differs */
+.case-study-image img {
+  width: 100%;
+  height: 100%;
+  padding: 1rem 0.5rem;
+  object-fit: cover;
+
+}
+
+/* Content area takes up remaining space
+   flex-direction column stacks children vertically
+   gap adds consistent spacing between each child element */
+.case-study-content {
+  flex: 1;
+  padding: 2rem 2rem 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Row of category tags — flex-wrap allows tags to 
+   wrap onto a new line if there are too many to fit */
+.case-study-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Row of outcome metrics — same pattern as tags */
+.case-study-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Base tag shape — inline-flex keeps icon and text 
+   vertically aligned on the same line */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 1rem;
+  border-radius: 100px;
+}
+
+/* Orange tint background — used for metrics to make them pop */
+.tag-tint {
+  background-color: var(--orange-tint);
+}
+
+/* Light grey background — used for category tags */
+.tag-grey {
+  background-color: var(--light-grey);
+}
+
+/* Recommendation card — same visual style as case study card */
+.recommendation-card {
+  height: 100%;
+  border-radius: 0.75rem 0.75rem 0 0;
+  border-bottom: 3px solid var(--orange);
+  box-shadow: 0 2px 12px var(--warm-shadow);
+}
+
+.recommendation-content {
+  height: 100%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+/* Name and role stacked vertically */
+.recommendation-attribution {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-top: 1px solid var(--orange);
+  padding-top: 1rem;
+
+
+}
+
+.quote-mark {
+  height: 2.5rem;
+  width: auto;
+  display: block;
+}
+
 /* ============================================
    MEDIA QUERIES
    Ordered largest to smallest breakpoint
@@ -365,15 +580,19 @@ nav.is-scrolled {
     flex-direction: column;
     align-items: flex-start;
     position: absolute;
-    top: 100%;           /* sits directly below the nav bar */
+    top: 100%;
+    /* sits directly below the nav bar */
     left: 0;
     right: 0;
     padding: 1.5rem 4rem 2.5rem;
     gap: 1.5rem;
     background-color: var(--orange-tint);
-    opacity: 0;          /* hidden by default */
-    pointer-events: none; /* non-interactive when hidden */
-    transform: translateY(-8px); /* slightly raised when hidden */
+    opacity: 0;
+    /* hidden by default */
+    pointer-events: none;
+    /* non-interactive when hidden */
+    transform: translateY(-8px);
+    /* slightly raised when hidden */
     transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
@@ -387,7 +606,8 @@ nav.is-scrolled {
   /* Nav bar turns orange when menu is open */
   nav.is-open {
     background-color: var(--orange);
-    border-bottom: none; /* removes the border between nav and menu */
+    border-bottom: none;
+    /* removes the border between nav and menu */
   }
 
   /* Hamburger lines turn white when menu is open */
@@ -437,7 +657,8 @@ nav.is-scrolled {
 
   /* Display text drops to 40px on mid screens */
   .display {
-    font-size: var(--text-3xl); /* 40px */
+    font-size: var(--text-3xl);
+    /* 40px */
     line-height: 1.4;
   }
 
@@ -451,6 +672,34 @@ nav.is-scrolled {
   .container {
     padding: 0 1.5rem;
   }
+
+  .recommendation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .case-study-card {
+    margin: 2rem 0 0 0;
+  }
+
+  .recommendation-grid {
+    margin: 2rem 0 0 0;
+  }
+
+  .text-link-right {
+    margin: 0.75rem 0 0 0;
+  }
+
+  .recommendation-content {
+    padding: 2rem 10rem;
+  }
+}
+
+/* reduce padding on recommendation card */
+@media (max-width: 850px) {
+  .recommendation-content {
+    padding: 6rem;
+  }
+
 }
 
 /* Grid drops to 3 columns below 768px */
@@ -459,6 +708,27 @@ nav.is-scrolled {
     grid-template-columns: repeat(3, 1fr);
     padding: 0 1rem;
   }
+
+
+
+  .case-study-card {
+    flex-direction: column;
+    margin: 2rem 0 0 0;
+  }
+
+  .case-study-image {
+    width: 100%;
+    height: 12rem;
+  }
+
+  .case-study-content {
+    padding: 1.5rem;
+  }
+
+  .recommendation-content {
+    padding: 2rem;
+  }
+
 }
 
 /* Section padding reduces and grid drops to 2 columns below 650px */
@@ -476,7 +746,8 @@ nav.is-scrolled {
 /* Display text drops further to 32px on small screens */
 @media (max-width: 550px) {
   .display {
-    font-size: var(--text-2xl); /* 32px */
+    font-size: var(--text-2xl);
+    /* 32px */
     line-height: 1.4;
   }
 }
