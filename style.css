@@ -704,12 +704,15 @@ nav.is-scrolled {
 
 /* Grid drops to 3 columns below 768px */
 @media (max-width: 768px) {
-  .logo-grid {
-    grid-template-columns: repeat(3, 1fr);
-    padding: 0 1rem;
+
+   .section {
+    padding: 1.5rem 1rem 2.5rem;
   }
 
-
+   .logo-grid {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0;
+  }
 
   .case-study-card {
     flex-direction: column;
