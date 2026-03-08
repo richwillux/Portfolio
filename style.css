@@ -655,22 +655,16 @@ nav.is-scrolled {
     text-decoration: underline;
   }
 
+  /* Setting padding on section */
+  .section {
+  padding: 2rem 1.5rem 3.75rem;
+}
+
   /* Display text drops to 40px on mid screens */
   .display {
     font-size: var(--text-3xl);
     /* 40px */
     line-height: 1.4;
-  }
-
-  /* Hero padding reduced on smaller screens */
-  .hero {
-    padding: 2rem 1.5rem 3.75rem;
-  }
-
-  /* Container gets side padding on smaller screens
-     to stop content touching the edges */
-  .container {
-    padding: 0 1.5rem;
   }
 
   .recommendation-grid {
@@ -705,7 +699,7 @@ nav.is-scrolled {
 /* Grid drops to 3 columns below 768px */
 @media (max-width: 768px) {
 
-   .section {
+  .section {
     padding: 1.5rem 1rem 2.5rem;
   }
 
@@ -736,13 +730,10 @@ nav.is-scrolled {
 
 /* Section padding reduces and grid drops to 2 columns below 650px */
 @media (max-width: 650px) {
-  .section {
-    padding: 2rem 1.5rem 3.75rem;
-  }
 
   .logo-grid {
     grid-template-columns: repeat(2, 1fr);
-    padding: 0 1rem;
+    
   }
 }
 
