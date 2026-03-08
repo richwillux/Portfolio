@@ -34,6 +34,8 @@
   /* 20px */
   --text-xl: 1.5rem;
   /* 24px */
+   --text-xxl: 1.75rem;
+  /* 28px */
   --text-2xl: 2rem;
   /* 32px */
   --text-3xl: 2.5rem;
@@ -738,6 +740,10 @@ nav.is-scrolled {
 
 /* Display text drops further to 32px on small screens */
 @media (max-width: 550px) {
+
+  .heading-lg{
+    font: var(--text-xxl);
+  }
   .display {
     font-size: var(--text-2xl);
     /* 32px */
