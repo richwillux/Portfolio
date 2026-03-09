@@ -18,7 +18,7 @@
   --light-grey: #F8F8F8;
   /* soft background on logo tiles */
   --white: #ffffff;
-  --warm-shadow: #E0D5C880;
+  --warm-shadow: #E0D5C8B0;
   /* warm beige shadow at 50% opacity used on cards*/
   --orange-shadow: #B24A0080;
   /* orange shadow at 50% opacity for open nav menu */
@@ -171,6 +171,7 @@ a {
   font-weight: 600;
   color: var(--orange);
   text-decoration: none;
+  margin-top: 1rem;
   transition: color 0.2s ease;
 }
 
@@ -189,7 +190,7 @@ a {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  margin: 1rem 3rem 0 0;
+  margin: 2.5rem 3rem 0 0rem;
 }
 
 /* Small heading for names */
@@ -203,9 +204,10 @@ a {
 /* Reusable medium heading — 24px, used for card titles 
    and any other mid-level headings across the site */
 .heading-md {
+  font-family: var(--font-display);
   font-size: var(--text-xl);
   /* 24px */
-  font-weight: 200;
+  font-weight: 300;
   color: var(--orange);
 }
 
@@ -451,7 +453,7 @@ footer {
   padding: 2rem 1.5rem;
   border-radius: 0.5rem;
   background-color: var(--light-grey);
-  box-shadow: 0 2px 12px var(--warm-shadow);
+  box-shadow: 0 4px 20px var(--warm-shadow);
 }
 
 /* Logo image — object-fit contain ensures it scales 
@@ -491,14 +493,21 @@ footer {
    overflow hidden ensures the image respects the border radius */
 .case-study-card {
   display: flex;
-  flex-direction: row;
-  gap: 2rem;
+  flex-direction: column;
+  
   border-radius: 0.75rem 0.75rem 0 0;
-  overflow: hidden;
+  
   margin: 2rem 2rem 0 2rem;
   min-width: 300px;
-  border-bottom: 3px solid var(--orange);
-  box-shadow: 0 2px 12px var(--warm-shadow);
+padding-bottom: 0;
+  box-shadow: 0 4px 20px var(--warm-shadow);
+}
+
+.case-study-inner {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  gap: 2rem;
 }
 
 /* Image container — fixed at 35% of card width
@@ -506,6 +515,13 @@ footer {
 .case-study-image {
   flex: 0 0 35%;
   overflow: stretch;
+}
+
+.card-divider {
+  width: 100%;
+  display: block;
+  height: 15px;
+  margin-bottom: -9px;
 }
 
 /* Image fills the container completely
@@ -566,14 +582,18 @@ footer {
 
 /* Recommendation card — same visual style as case study card */
 .recommendation-card {
+    display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  
   height: 100%;
   border-radius: 0.75rem 0.75rem 0 0;
-  border-bottom: 3px solid var(--orange);
-  box-shadow: 0 2px 12px var(--warm-shadow);
+  
+  box-shadow: 0 4px 20px var(--warm-shadow);
 }
 
 .recommendation-content {
-  height: 100%;
+  flex:1;
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -798,7 +818,7 @@ footer {
   }
 
   .text-link-right {
-    margin: 1rem 2.5rem 0 0;
+    margin: 2.5rem 2.5rem 0 0rem;
   }
 
   .recommendation-content {
@@ -833,8 +853,11 @@ footer {
     padding: 0 1rem;
   }
 
-  .case-study-card {
+  .case-study-inner {
     flex-direction: column;
+  }
+
+  .case-study-card {
     margin: 2rem 1rem 0;
   }
 
@@ -856,7 +879,7 @@ footer {
   }
 
   .text-link-right {
-    margin: 2rem 1rem 0 0;
+    margin: 2.5rem 1rem 0 0rem;
   }
 
 }
