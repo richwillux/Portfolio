@@ -1094,7 +1094,7 @@ footer {
   }
 
   .logo-grid {
-    margin: 0 1rem 3rem 1rem;
+    margin: 0 1.5rem 3rem 1.5rem;
   }
 
   .case-study-card {
@@ -1108,7 +1108,7 @@ footer {
   }
 
   .text-link-right {
-    margin: 0rem 3rem 2rem 0rem;
+    margin: 0rem 1.5rem 2rem 0rem;
   }
 
   .recommendation-content {
@@ -1172,7 +1172,7 @@ figure {
 }
 
   .text-link-right {
-    margin: 0rem 3rem 2rem 0rem;
+    margin: 0rem 1rem 2rem 0rem;
   }
 }
 
