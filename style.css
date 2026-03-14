@@ -749,10 +749,10 @@ form {
 }
 
 label {
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-warm);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 400;
+  color: var(--orange);
 }
 
 input,

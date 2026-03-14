@@ -57,10 +57,10 @@ if (form) {
 
     const data = new FormData(form);
 
-    // await fetch('/', {
-    //   method: 'POST',
-    //   body: data
-    // });
+    await fetch('/', {
+      method: 'POST',
+      body: data
+    });
 
     form.reset();
 
