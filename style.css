@@ -31,6 +31,8 @@
   /* 14px */
   --text-base: 1rem;
   /* 16px */
+  --text-m: 1.125rem;
+  /* 18px */
   --text-lg: 1.25rem;
   /* 20px */
   --text-xl: 1.5rem;
@@ -139,6 +141,9 @@
 body {
   font-family: var(--font-body);
   color: var(--text-dark);
+    display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 p {
@@ -233,7 +238,7 @@ a {
   font-weight: 300;
   color: var(--orange);
   margin-bottom: 0.75rem;
-    display: flex;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
 }
@@ -344,6 +349,13 @@ figcaption span:last-child {
   align-items: center;
   gap: 0.5rem;
 }
+
+/* Prose — constrains long-form text to a readable line length */
+.page-intro {
+  max-width: 65ch;
+  margin-bottom: 1.5rem;
+}
+
 
 /* Prose — constrains long-form text to a readable line length */
 .prose {
@@ -476,11 +488,18 @@ figcaption span:last-child {
 
 .case-study-card {
   display: flex;
+  position: relative;
   flex-direction: column;
   border-radius: 0.75rem 0.75rem 0 0;
   margin: 0rem 2rem 2rem 2rem;
   min-width: 300px;
   box-shadow: 0 4px 20px var(--warm-shadow);
+}
+
+.case-study-card .text-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
 }
 
 .case-study-inner {
@@ -652,12 +671,13 @@ figcaption span:last-child {
   display: flex;
   align-items: center;
   justify-content: center;
-  align-self: stretch; /* fills the full card height minus padding */
+  align-self: stretch;
+  /* fills the full card height minus padding */
   flex-shrink: 0;
 }
 
 .callout-icon img {
-  height:auto;
+  height: auto;
   width: 2rem;
 }
 
@@ -681,6 +701,123 @@ figcaption span:last-child {
   color: var(--white);
   font-size: var(--text-base);
 }
+
+.about-hero-image {
+  width: 100%;
+  height: 600px;
+  object-fit: cover;
+  object-position: bottom;
+  border-style: solid;
+  border-color: var(--orange-tint);
+  border-width: 0.5rem;
+  border-radius: 0.5rem 5.5rem 0.5rem;
+}
+
+.about-hero-card {
+  position: absolute;
+  bottom: -6rem;
+  /* pulls it down to overlap below the image */
+  left: 2.5rem;
+  /* aligns with your section padding */
+  max-width: 480px;
+  background-color: var(--white);
+  border-radius: 0.75rem;
+  padding: 2rem 2rem 0 2rem;
+  box-shadow: 0 4px 20px var(--warm-shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.about-hero-card .card-divider {
+  width: calc(100% + 4rem);
+  margin-left: -2rem;
+  display: block;
+}
+
+/* --- Contact form --- */
+
+form {
+  max-width: 520px;
+  margin-bottom: 3rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+label {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-warm);
+}
+
+input,
+textarea {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-dark);
+  background-color: var(--white);
+  border: 1.5px solid var(--warm-shadow);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(178, 74, 0, 0.15);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 160px;
+}
+
+form .small-button {
+  background-color: var(--orange);
+  color: var(--white);
+  padding: 0.75rem 2rem;
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-family: var(--font-body);
+}
+
+form .small-button:hover {
+  background-color: var(--orange-dark);
+}
+
+/* --- Toast --- */
+
+.toast {
+  position: relative;
+  background-color: var(--text-warm);
+  color: var(--white);
+  padding: 0.75rem 1.5rem;
+  border-radius: 100px;
+  font-size: var(--text-sm);
+  opacity: 0;
+  max-height: 0;
+  transition: opacity 0.3s ease, max-height 0.3s ease, margin 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  display: inline-block;
+  margin-top: 0;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  max-height: 3rem;
+  margin-top: 1rem;
+}
+
 
 
 /* ============================================
@@ -901,11 +1038,26 @@ nav.is-scrolled {
   margin-bottom: 1.5rem;
 }
 
+/* --- About me page --- */
+
+/* Hero card */
+
+.about-hero {
+  position: relative;
+  margin-bottom: 8rem;
+  /* creates space for the card overlap */
+}
+
+.about-hero .container {
+  position: relative;
+}
+
 /* --- Footer --- */
 
 footer {
   background-color: var(--orange);
   padding: 3rem 2.5rem 2rem;
+  margin-top: auto;
 }
 
 .footer-inner {
@@ -1093,6 +1245,12 @@ footer {
     font-size: var(--text-2xl);
   }
 
+  /* Page title drops to 32px on mid screens */
+  .heading-xl {
+    font-size: var(--text-3xl);
+  }
+
+
   .logo-grid {
     margin: 0 1.5rem 3rem 1.5rem;
   }
@@ -1114,6 +1272,18 @@ footer {
   .recommendation-content {
     padding: 2rem 10rem;
   }
+
+  .about-hero-card {
+    bottom: -28rem;
+    /* push card down so image is visible */
+  }
+
+
+  .about-hero {
+    margin-bottom: 30rem;
+    /* creates space for the card overlap */
+  }
+
 }
 
 @media (max-width: 850px) {
@@ -1166,18 +1336,68 @@ footer {
     padding: 2rem;
   }
 
-figure {
-  padding: 3rem 2rem 2rem;
-  
-}
+  figure {
+    padding: 3rem 2rem 2rem;
+
+  }
 
   .text-link-right {
     margin: 0rem 1rem 2rem 0rem;
   }
+
+  .reading p,
+  .reading li {
+
+    /* Reading content drops to 18px on smaller screens */
+    font-size: var(--text-m);
+
+  }
+
+  .about-hero-card {
+    left: 1.5rem;
+    /* aligns with your section padding */
+    right: 1.5rem;
+    max-width: none;
+  }
+
+  .about-hero-card {
+    bottom: -20rem;
+    /* push card down so image is visible */
+  }
+
+
+  .about-hero {
+    margin-bottom: 22rem;
+    /* creates space for the card overlap */
+  }
+
 }
 
 @media (max-width: 650px) {
   .logo-grid {
     grid-template-columns: repeat(2, 1fr);
+
+  }
+
+  .about-hero-image {
+    object-position: right;
+    margin-bottom: 1.5rem;
+  }
+
+  .about-hero {
+    margin-bottom: 0;
+    /* remove the overlap margin */
+  }
+
+  .about-hero-card {
+    position: static;
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-hero-image {
+    display: none;
   }
 }

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rich Williams</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/svg+xml" href="assets/icons/rwlogo.svg" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300;1,8..60,400&display=swap"
+        rel="stylesheet">
+</head>
+
+
+
+<!-- Navigation -->
+<nav>
+    <div class="nav-inner">
+        <div class="nav-logo">
+            <a href="../index.html" class="nav-logo"><img src="assets/icons/rwlogo.svg" alt="Rich Williams" /></a>
+        </div>
+        <button class="nav-toggle" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="About.html">About me</a></li>
+            <li><a href="case-studies/index.html">Case studies</a></li>
+            <li><a href="#" class="small-button">Get in touch</a></li>
+        </ul>
+    </div>
+</nav>
+
+<p class="breadcrumb"><a href="index.html"><img src="assets/icons/home.svg" alt="Home" /></a> / </p>
+
+<body>
+
+    <!-- Page title -->
+    <section class="section page-title">
+        <div class="container">
+            <h1 class="heading-xl">Get in touch</h1>
+            <div class="page-intro">
+                <p>Drop me a message and I'll get back to you as soon as I can.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+
+            <form name="contact" method="POST" data-netlify="true">
+                <input type="hidden" name="form-name" value="contact" />
+
+                <div class="form-field">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required />
+                </div>
+
+                <div class="form-field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required />
+                </div>
+
+                <div class="form-field">
+                    <label for="message">How can I help?</label>
+                    <textarea id="message" name="message" rows="6" required></textarea>
+                </div>
+
+                <button type="submit" class="small-button">Send message</button>
+                <div class="toast" id="toast">Thanks for your message — I'll be in touch soon!</div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div>
+            <div class="footer-inner">
+
+                <!-- Nav links left -->
+                <div class="footer-nav">
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">About me</a></li>
+                        <li><a href="#">Case studies</a></li>
+                    </ul>
+                </div>
+
+                <!-- Logo and links right -->
+                <div class="footer-right">
+                    <img src="assets/icons/rwlogo.svg" alt="Rich Williams" class="footer-logo" />
+                    <a href="https://www.linkedin.com/in/richinname" target="_blank" class="footer-link">
+                        <img src="assets/icons/LinkedIn.png" alt="" />
+                        LinkedIn
+                    </a>
+                    <a href="mailto:rich@rich-ux.co.uk" class="footer-link">
+                        <img src="assets/icons/email.svg" alt="" />
+                        rich@rich-ux.co.uk
+                    </a>
+                    <a href="assets/rich-williams-cv.pdf" target="_blank" rel="noopener noreferrer" download
+                        class="footer-link">
+                        <img src="assets/icons/download.png" alt="" />
+                        Download CV
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Footer bottom bar -->
+            <div class="footer-bottom">
+                <span>© 2026 Rich Williams</span>
+                <a href="#" class="footer-link">Back to top</a>
+            </div>
+
+        </div>
+    </footer>
+
+
+    <script src="main.js"></script>
+
+    
+</body>
+
+</html>
