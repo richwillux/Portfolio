@@ -5,6 +5,7 @@ const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modal-img');
 const modalClose = document.getElementById('modal-close');
 const form = document.querySelector('form[name="contact"]');
+const toastWip = document.getElementById('toast-wip');
 
 /*controls the menu and burger icon on small screens*/
 navToggle.addEventListener('click', function () {
@@ -71,4 +72,13 @@ if (form) {
       toast.classList.remove('is-visible');
     }, 8000);
   });
+}
+
+if (toastWip) {
+  setTimeout(() => {
+    toastWip.classList.add('is-visible');
+    setTimeout(() => {
+      toastWip.classList.remove('is-visible');
+    }, 8000);
+  }, 1000);
 }

@@ -158,6 +158,11 @@ a {
   text-underline-offset: 0.25rem;
 }
 
+#toast-wip a {
+  color: var(--white);
+  text-decoration: underline;
+}
+
 
 /* ============================================
    UTILITIES
@@ -800,7 +805,7 @@ form .small-button:hover {
   position: relative;
   background-color: var(--text-warm);
   color: var(--white);
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.5rem;
   border-radius: 100px;
   font-size: var(--text-sm);
   opacity: 0;
@@ -810,12 +815,41 @@ form .small-button:hover {
   white-space: nowrap;
   display: inline-block;
   margin-top: 0;
+    display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
 }
 
 .toast.is-visible {
   opacity: 1;
   max-height: 3rem;
   margin-top: 1rem;
+}
+
+.toast img {
+  height: 3rem;
+  width: auto;
+  flex-shrink: 0;
+  margin-top: 0.2em;
+}
+
+/* --- Toast on homepage --- */
+
+#toast-wip {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  max-width: 320px;
+  border-radius: 0.5rem;
+  white-space: normal;
+  transform: translateY(2rem);
+  display: flex; /* override inline-block */
+}
+
+#toast-wip.is-visible {
+  transform: translateY(0);
+  max-height: 200px; /* override the 3rem limit */
+  pointer-events: auto;
 }
 
 
