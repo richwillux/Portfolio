@@ -499,6 +499,7 @@ figcaption span:last-child {
   margin: 0rem 2rem 2rem 2rem;
   min-width: 300px;
   box-shadow: 0 4px 20px var(--warm-shadow);
+
 }
 
 .case-study-card .text-link::after {
@@ -517,6 +518,18 @@ figcaption span:last-child {
 /* flex: 0 0 35% means don't grow, don't shrink, stay at 35% */
 .case-study-image {
   flex: 0 0 35%;
+  overflow: hidden;
+ padding: 0.5rem;
+ position: relative;
+}
+
+.case-study-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+ mask-image: linear-gradient(to right, black 75%, 95%, transparent 100%);
+-webkit-mask-image: linear-gradient(to right, black 75%, 95%, transparent 100%);
 }
 
 .card-divider {
@@ -530,8 +543,8 @@ figcaption span:last-child {
 .case-study-image img {
   width: 100%;
   height: 100%;
-  padding: 1rem 0.5rem;
   object-fit: cover;
+  border-radius: 0.5rem 0 0 0;
 }
 
 /* flex column stacks children vertically */
@@ -646,9 +659,20 @@ figcaption span:last-child {
   gap: 0.5rem;
 }
 
-.icon-list li::before {
+.icon-list.outcomes li::before {
   content: '';
   background-image: url('assets/icons/rosette.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 1em;
+  width: 1em;
+  flex-shrink: 0;
+  margin-top: 0.4em;
+}
+
+.icon-list.actions li::before {
+  content: '';
+  background-image: url('assets/icons/circle-ck.svg');
   background-size: contain;
   background-repeat: no-repeat;
   height: 1em;
