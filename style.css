@@ -353,6 +353,8 @@ figcaption span:last-child {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+   font-size: var(--text-xs);
+  opacity: 0.75;
 }
 
 /* Prose — constrains long-form text to a readable line length */
@@ -536,7 +538,18 @@ figcaption span:last-child {
   width: 100%;
   display: block;
   height: 15px;
+ 
+  fill: var(--orange);
+}
+
+.case-study-card .card-divider,
+.recommendation-card .card-divider,
+.about-hero-card .card-divider {
   margin-bottom: -9px;
+}
+
+.card-divider.divider-tint path {
+  fill: var(--orange-tint);
 }
 
 /* object-fit cover crops rather than distorts */
