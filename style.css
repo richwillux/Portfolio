@@ -694,6 +694,17 @@ figcaption span:last-child {
   margin-top: 0.4em;
 }
 
+.icon-list.alerts li::before {
+  content: '';
+  background-image: url('assets/icons/alert.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 1em;
+  width: 1em;
+  flex-shrink: 0;
+  margin-top: 0.4em;
+}
+
 /* --- Callout --- */
 
 .callout {
