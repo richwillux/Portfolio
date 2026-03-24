@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌿 Maths Maze</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:#b8ddb8;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.screen{display:none;}
+.screen.active{display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;min-height:100vh;width:100%;padding:1rem 0.5rem;gap:.6rem;
+  overflow-y:auto;}
+
+/* TITLE SCREEN */
+.title-hero{font-family:'Fredoka One',cursive;font-size:clamp(2.2rem,7vw,3.8rem);
+  color:#fff;text-shadow:3px 3px 0 #1b5e20,5px 5px 0 #0a3d10;text-align:center;
+  line-height:1;margin-top:.5rem;}
+.title-sub{font-size:.9rem;font-weight:800;color:#1b5e20;background:rgba(255,255,255,.85);
+  padding:.3rem 1rem;border-radius:20px;}
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;
+  width:100%;max-width:860px;padding:0 .5rem;}
+.diff-card{background:rgba(255,255,255,.94);border:3px solid #aed581;border-radius:18px;
+  padding:.9rem 1rem;box-shadow:0 4px 0 #2e7d32;
+  display:flex;flex-direction:column;}
+.diff-name{font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:.25rem;}
+.diff-easy .diff-name{color:#2e7d32;}
+.diff-medium .diff-name{color:#f57c00;}
+.diff-hard .diff-name{color:#c62828;}
+.diff-extreme .diff-name{color:#6a1b9a;}
+.diff-desc{font-size:.75rem;font-weight:700;color:#555;line-height:1.5;margin-bottom:.6rem;}
+.diff-lb{margin-bottom:.6rem;flex:1;}
+.diff-lb-title{font-size:.7rem;font-weight:800;color:#777;text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:.3rem;}
+.lb-row{display:flex;justify-content:space-between;align-items:center;
+  font-size:.72rem;font-weight:700;padding:.15rem .4rem;border-radius:6px;
+  background:#f1f8e9;margin-bottom:.15rem;color:#33691e;}
+.lb-row.me{background:#e8f5e9;border:1.5px solid #81c784;font-weight:900;}
+.lb-rank{color:#888;min-width:1.4rem;}
+.lb-name{flex:1;margin:0 .4rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lb-time{color:#1b5e20;font-family:'Fredoka One',cursive;}
+.lb-empty{font-size:.7rem;color:#aaa;text-align:center;padding:.3rem;}
+.diff-play-btn{width:100%;font-family:'Fredoka One',cursive;font-size:1rem;
+  padding:.55rem;border:none;border-radius:12px;color:#fff;cursor:pointer;
+  box-shadow:0 3px 0 rgba(0,0,0,.25);transition:all .12s;}
+.diff-easy .diff-play-btn{background:#4caf50;}
+.diff-medium .diff-play-btn{background:#ff9800;}
+.diff-hard .diff-play-btn{background:#f44336;}
+.diff-extreme .diff-play-btn{background:#9c27b0;}
+.diff-play-btn:hover{filter:brightness(1.1);transform:translateY(-2px);}
+.diff-play-btn:active{transform:translateY(1px);}
+
+/* BUTTONS */
+.btn{font-family:'Fredoka One',cursive;font-size:1rem;padding:.7rem 1.8rem;border:none;
+  border-radius:12px;background:#66bb6a;color:#fff;cursor:pointer;
+  box-shadow:0 4px 0 #2e7d32;transition:all .12s;}
+.btn:hover{background:#43a047;transform:translateY(-2px);box-shadow:0 6px 0 #1b5e20;}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #1b5e20;}
+.btn-big{font-size:1.2rem;padding:.85rem 2.6rem;}
+
+/* GAME SCREEN */
+#game-screen{justify-content:flex-start;padding:.4rem;gap:.4rem;
+  background:#b8ddb8;min-height:100vh;}
+.hud{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:.3rem;width:100%;max-width:900px;background:rgba(255,255,255,.96);
+  border:3px solid #aed581;border-radius:14px;padding:.35rem .8rem;
+  box-shadow:0 3px 0 #2e7d32;}
+.hud-title{font-family:'Fredoka One',cursive;font-size:1rem;color:#2e7d32;}
+.hud-exit-btn{font-family:'Fredoka One',cursive;font-size:.78rem;padding:.2rem .7rem;
+  border:2px solid #ef9a9a;border-radius:10px;background:rgba(229,57,53,.08);
+  color:#c62828;cursor:pointer;}
+.hud-exit-btn:hover{background:rgba(229,57,53,.18);}
+
+.pill{font-size:.76rem;font-weight:800;padding:.18rem .55rem;border-radius:20px;border:2px solid;}
+.pill-streak{color:#e65100;border-color:#ff8f00;background:rgba(255,143,0,.12);}
+.pill-timer{color:#1565c0;border-color:#1976d2;background:rgba(25,118,210,.1);
+  font-family:'Fredoka One',cursive;font-size:.85rem;}
+.pill-timer.bonus{color:#2e7d32;border-color:#4caf50;background:rgba(76,175,80,.15);
+  animation:timerBonus .6s ease;}
+@keyframes timerBonus{0%{transform:scale(1.2)}100%{transform:scale(1)}}
+.pill-prog{font-size:.78rem;font-weight:800;color:#33691e;}
+.pill-score{color:#1a237e;border-color:#3949ab;background:rgba(57,73,171,.1);font-size:.76rem;}
+.maze-viewport{
+  width:100%;max-width:900px;height:490px;
+  border:4px solid #2e7d32;border-radius:14px;overflow:hidden;
+  box-shadow:0 4px 0 #1b5e20,0 6px 24px rgba(0,0,0,.2);
+  position:relative;background:#1a5c1e;}
+#mc{position:absolute;top:0;left:0;cursor:default;}
+
+/* END SCREENS */
+.end-box{background:rgba(255,255,255,.95);border:4px solid #aed581;border-radius:20px;
+  padding:1.5rem 1.2rem;text-align:center;max-width:460px;width:100%;
+  box-shadow:0 6px 0 #2e7d32;margin:.5rem 0;}
+.end-icon{font-size:3rem;display:block;margin-bottom:.4rem;
+  animation:bnc 1s ease infinite alternate;}
+@keyframes bnc{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+.end-title{font-family:'Fredoka One',cursive;font-size:clamp(1.6rem,7vw,2.4rem);
+  margin-bottom:.4rem;}
+#win-screen .end-title{color:#2e7d32;}
+#lose-screen .end-title{color:#e53935;}
+.end-msg{font-size:.88rem;font-weight:700;color:#33691e;margin-bottom:.6rem;line-height:1.5;}
+.end-stats{font-size:.82rem;font-weight:800;color:#33691e;background:#f1f8e9;
+  border:2px solid #aed581;border-radius:10px;padding:.5rem .9rem;
+  margin-bottom:.8rem;line-height:1.8;}
+.score-entry{display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  background:#e8f5e9;border:2px solid #a5d6a7;border-radius:12px;
+  padding:.8rem;margin-bottom:.8rem;}
+.score-entry input{font-family:'Fredoka One',cursive;font-size:1rem;
+  padding:.4rem .8rem;border:2px solid #aed581;border-radius:10px;
+  text-align:center;width:180px;outline:none;}
+.score-entry input:focus{border-color:#2e7d32;}
+.score-entry-label{font-size:.82rem;font-weight:800;color:#2e7d32;}
+.btn-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;}
+
+/* TOAST */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);
+  padding:.45rem 1.2rem;border-radius:20px;font-family:'Fredoka One',cursive;
+  font-size:.9rem;z-index:500;pointer-events:none;white-space:nowrap;
+  animation:tIn .22s ease,tOut .3s 1.8s ease forwards;
+  box-shadow:0 4px 15px rgba(0,0,0,.2);}
+.toast.correct{background:#00c851;color:#fff;}
+.toast.wrong{background:#ff4444;color:#fff;}
+.toast.bonus{background:#ffb300;color:#333;}
+@keyframes tIn{from{opacity:0;transform:translateX(-50%) translateY(-12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes tOut{to{opacity:0}}
+.bflash{position:fixed;inset:0;background:rgba(255,213,0,.22);pointer-events:none;
+  z-index:400;animation:bfo .6s ease forwards;}
+@keyframes bfo{to{opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- TITLE / LEADERBOARD SCREEN -->
+<div id="title-screen" class="screen active">
+  <div class="title-hero">🌿 Maths Maze 🌿</div>
+  <div class="title-sub">Solve the sums — find the exit!</div>
+  <div class="diff-grid">
+
+    <div class="diff-card diff-easy">
+      <div class="diff-name">🌱 Easy</div>
+      <div class="diff-desc">+ and − only<br>Numbers under 100<br>Perfect for beginners!</div>
+      <div class="diff-lb">
+        <div class="diff-lb-title">Top 10 Times</div>
+        <div id="lb-easy"></div>
+      </div>
+      <button class="diff-play-btn" onclick="startGame('easy')">Play Easy →</button>
+    </div>
+
+    <div class="diff-card diff-medium">
+      <div class="diff-name">🌿 Medium</div>
+      <div class="diff-desc">+ and − only<br>Numbers up to 10,000<br>Bigger numbers, bigger challenge!</div>
+      <div class="diff-lb">
+        <div class="diff-lb-title">Top 10 Times</div>
+        <div id="lb-medium"></div>
+      </div>
+      <button class="diff-play-btn" onclick="startGame('medium')">Play Medium →</button>
+    </div>
+
+    <div class="diff-card diff-hard">
+      <div class="diff-name">🔥 Hard</div>
+      <div class="diff-desc">+ − × ÷<br>Numbers under 100<br>All four operations!</div>
+      <div class="diff-lb">
+        <div class="diff-lb-title">Top 10 Times</div>
+        <div id="lb-hard"></div>
+      </div>
+      <button class="diff-play-btn" onclick="startGame('hard')">Play Hard →</button>
+    </div>
+
+    <div class="diff-card diff-extreme">
+      <div class="diff-name">💀 Extreme</div>
+      <div class="diff-desc">+ − × ÷<br>Numbers up to 10,000<br>Only the brave dare enter!</div>
+      <div class="diff-lb">
+        <div class="diff-lb-title">Top 10 Times</div>
+        <div id="lb-extreme"></div>
+      </div>
+      <button class="diff-play-btn" onclick="startGame('extreme')">Play Extreme →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game-screen" class="screen">
+  <div class="hud">
+    <div class="hud-title">🌿 Maths Maze</div>
+    <button class="hud-exit-btn" onclick="confirmExit()" title="Exit game">✕ Exit</button>
+    <div class="pill pill-streak" id="hud-streak">🔥 0</div>
+    <div class="pill pill-timer" id="hud-timer">⏱ 0s</div>
+    <div class="pill-prog" id="hud-prog">Step 1 / 10</div>
+    <div class="pill pill-score" id="hud-score">✅ 0 &nbsp; ❌ 0</div>
+  </div>
+  <div class="maze-viewport" id="viewport">
+    <canvas id="mc"></canvas>
+  </div>
+</div>
+
+<!-- WIN SCREEN -->
+<div id="win-screen" class="screen">
+  <div class="end-box">
+    <span class="end-icon">🏆</span>
+    <div class="end-title">You Escaped!</div>
+    <p class="end-msg">Amazing — you solved every riddle! 🎉</p>
+    <div class="end-stats" id="win-stats"></div>
+    <div class="score-entry" id="score-entry-box">
+      <div class="score-entry-label">You made the Top 10! Enter your name:</div>
+      <input type="text" id="player-name" maxlength="16" placeholder="Your name" autocomplete="off">
+      <button class="btn" onclick="submitScore()">Submit Score 🏆</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-big" id="win-play-again">Play Again</button>
+      <button class="btn" onclick="goHome()">Change Difficulty</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOSE SCREEN -->
+<div id="lose-screen" class="screen">
+  <div class="end-box">
+    <span class="end-icon">🌿</span>
+    <div class="end-title">Lost in the Maze!</div>
+    <p class="end-msg">Three wrong turns — the hedges swallowed you!</p>
+    <div class="end-stats" id="lose-stats"></div>
+    <div class="btn-row">
+      <button class="btn btn-big" id="lose-play-again">Try Again</button>
+      <button class="btn" onclick="goHome()">Change Difficulty</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ============================================================
+//  CONSTANTS
+// ============================================================
+const CW=2400, CH=1600;
+const PW=80;       // path width
+const CR=40;       // answer circle radius
+const ARM=90;      // uniform arm length for ALL arms
+const SAND='#c4924a';
+const SAND_DONE='#b5cfa0';
+
+const cv=document.getElementById('mc');
+const C=cv.getContext('2d');
+let offHedge=null;
+
+// ============================================================
+//  DIFFICULTY CONFIG
+// ============================================================
+const DIFFS={
+  easy:   {ops:['add','sub'],    maxN:99,   label:'Easy'},
+  medium: {ops:['add','sub'],    maxN:9999, label:'Medium'},
+  hard:   {ops:['add','sub','mul','div'], maxN:99,   label:'Hard'},
+  extreme:{ops:['add','sub','mul','div'], maxN:9999, label:'Extreme'},
+};
+let currentDiff='easy';
+
+// ============================================================
+//  LEADERBOARD (localStorage)
+// ============================================================
+function lbKey(diff){ return 'mmaze_lb_'+diff; }
+function getBoard(diff){
+  try{ return JSON.parse(localStorage.getItem(lbKey(diff)))||[]; }
+  catch(e){ return []; }
+}
+function saveBoard(diff,board){
+  try{ localStorage.setItem(lbKey(diff),JSON.stringify(board)); }catch(e){}
+}
+function addScore(diff,name,secs,isPerfect){
+  const board=getBoard(diff);
+  secs=Math.max(1,secs);
+  board.push({name:name.trim().substring(0,16)||'???',time:secs,perfect:isPerfect||false});
+  board.sort((a,b)=>a.time-b.time);
+  board.splice(10);
+  saveBoard(diff,board);
+  return board;
+}
+function qualifiesForBoard(diff,secs){
+  const board=getBoard(diff);
+  if(board.length<10) return true;
+  return secs<board[board.length-1].time;
+}
+
+function renderBoard(diff){
+  const el=document.getElementById('lb-'+diff);
+  if(!el) return;
+  const board=getBoard(diff);
+  if(board.length===0){
+    el.innerHTML='<div class="lb-empty">No scores yet — be first!</div>';
+    return;
+  }
+  el.innerHTML=board.slice(0,5).map((e,i)=>
+    `<div class="lb-row">
+      <span class="lb-rank">${i+1}.</span>
+      <span class="lb-name">${escHtml(e.name)}${e.perfect?'<span class="rosette" title="Perfect game!"> 🌟</span>':''}</span>
+      <span class="lb-time">${e.time}s</span>
+    </div>`
+  ).join('');
+}
+function renderAllBoards(){ ['easy','medium','hard','extreme'].forEach(renderBoard); }
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ============================================================
+//  CANVAS SETUP
+// ============================================================
+function setupCanvas(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.style.width=CW+'px'; cv.style.height=CH+'px';
+  cv.width=CW*dpr; cv.height=CH*dpr;
+  C.setTransform(dpr,0,0,dpr,0,0);
+  offHedge=document.createElement('canvas');
+  offHedge.width=CW; offHedge.height=CH;
+}
+
+// ============================================================
+//  SMOOTH PAN WITH AVATAR WALK ANIMATION
+// ============================================================
+let panX=0,panY=0,tX=0,tY=0,panRaf=null;
+// Avatar walk animation state
+let avatarX=0,avatarY=0;
+let walkQueue=[];   // array of {x,y} waypoints to walk through in order
+let avatarWalking=false;
+let onWalkComplete=null; // callback when walk queue is finished
+
+function applyPan(){ cv.style.transform='translate('+(-panX)+'px,'+(-panY)+'px)'; }
+
+function panTo(cx2,cy2,instantly){
+  const vw=document.getElementById('viewport').clientWidth||900;
+  const vh=document.getElementById('viewport').clientHeight||490;
+  const nx=Math.max(0,Math.min(CW-vw,cx2-vw/2));
+  const ny=Math.max(0,Math.min(CH-vh,cy2-vh/2));
+  if(instantly){ panX=nx;panY=ny;tX=nx;tY=ny;applyPan();return; }
+  tX=nx; tY=ny;
+  if(typeof startAnimLoop==='function') startAnimLoop(); else if(!panRaf) panRaf=requestAnimationFrame(animatePan);
+}
+function animatePan(){
+  // Pan camera
+  const dx=tX-panX,dy=tY-panY;
+  const panDone=Math.abs(dx)<0.8&&Math.abs(dy)<0.8;
+  if(!panDone){ panX+=dx*0.055; panY+=dy*0.055; }
+  else { panX=tX; panY=tY; }
+  applyPan();
+
+  // Walk avatar along queue of waypoints with smooth easing
+  if(walkQueue.length>0){
+    const wp=walkQueue[0];
+    const adx=wp.x-avatarX, ady=wp.y-avatarY;
+    const dist=Math.sqrt(adx*adx+ady*ady);
+    if(dist<3.5){
+      // Snap to waypoint exactly — no overshoot
+      avatarX=wp.x; avatarY=wp.y;
+      walkQueue.shift();
+      if(walkQueue.length===0){
+        avatarWalking=false;
+        if(onWalkComplete){ const cb=onWalkComplete; onWalkComplete=null; cb(); }
+      }
+    } else {
+      // Constant speed walk - simple, no overshoot
+      const speed=3.2;
+      avatarX+=adx/dist*speed; avatarY+=ady/dist*speed;
+      avatarWalking=true;
+    }
+  }
+
+  render();
+  if(!panDone || walkQueue.length>0 || avatarWalking){
+    panRaf=requestAnimationFrame(animatePan);
+  } else {
+    panRaf=null;
+  }
+}
+
+function startAnimLoop(){
+  if(panRaf) return;
+  panRaf=requestAnimationFrame(animatePan);
+}
+
+function walkAvatarAlongPath(waypoints, panTarget, callback){
+  walkQueue=[...waypoints];
+  onWalkComplete=callback||null;
+  avatarWalking=true;
+  if(panTarget) panTo(panTarget.x,panTarget.y);
+  startAnimLoop();
+}
+
+window.addEventListener('resize',()=>{
+  if(document.getElementById('game-screen').classList.contains('active')){
+    const ri2=JUNCTIONS[Math.min(currentStep,9)]; if(ri2) panTo(ri2.jx,ri2.jy,false);
+  }
+});
+
+// ============================================================
+//  MAZE LAYOUT
+// ============================================================
+// Junction TEMPLATES — just arm angles. Positions computed per-game in buildSteps.
+// Each template lists 3 arm angles. The correct one is chosen randomly each game.
+// We design templates so the maze zigzags nicely across the canvas.
+const JUNC_TEMPLATES=[
+  [270, 0, 90],   // step 0: up / right / down
+  [270, 0, 90],   // step 1
+  [270, 0, 90],   // step 2
+  [270, 0, 90],   // step 3
+  [270, 0, 90],   // step 4
+  [270, 0, 90],   // step 5
+  [270, 0, 90],   // step 6 — exit arm always goes right
+];
+
+// These are populated per-game in buildSteps:
+let JUNCTIONS=[];
+const ENTRY_X=150, ENTRY_Y=800;
+let EXIT_X=CW-10, EXIT_Y=800;
+
+// ============================================================
+//  MATHS GENERATION
+// ============================================================
+function ri(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=ri(0,i);[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function genQ(carried,diff){
+  const cfg=DIFFS[diff];
+  const op=pick(cfg.ops);
+  let a=carried,b,ans,qs;
+  const M=cfg.maxN;
+
+  if(op==='add'){
+    b=ri(2,Math.min(M-a,Math.floor(M*0.3)));
+    if(b<1)b=1;
+    ans=a+b; qs=a+' + '+b;
+  } else if(op==='sub'){
+    if(a<=1){ // can't subtract from 0 or 1 meaningfully, fall back to add
+      b=ri(2,Math.min(M-a,15)); ans=a+b; qs=a+' + '+b;
+    } else {
+      b=ri(1,Math.max(1,Math.min(a-1,Math.floor(M*0.3))));
+      ans=a-b; qs=a+' - '+b;
+    }
+  } else if(op==='mul'){
+    b=ri(2,M<=99?9:99);
+    a=ri(2,Math.floor(Math.sqrt(M)));
+    ans=a*b;
+    if(ans>M){b=Math.floor(M/a)||1;ans=a*b;}
+    qs=a+' x '+b;
+  } else { // div
+    b=ri(2,M<=99?9:20);
+    a=b*ri(1,Math.floor(M/b));
+    ans=a/b; qs=a+' / '+b;
+  }
+  return{qs,ans:Math.round(ans)};
+}
+
+function wrongAnswers(correct,count,diff){
+  const M=DIFFS[diff].maxN;
+  const s=new Set([correct]);let t=0;
+  while(s.size<count+1&&t<500){
+    t++;
+    const spread=Math.max(3,Math.round(Math.abs(correct)*0.25)+5);
+    const c=correct+ri(-spread,spread);
+    if(c===correct||c<0||c>M*2)continue;
+    s.add(c);
+  }
+  s.delete(correct);return[...s].slice(0,count).map(String);
+}
+
+// ============================================================
+//  GAME STATE
+// ============================================================
+let streak,stepIdx,wrongTotal,startTime,timerInterval,elapsedSecs=0;
+let currentStep=0,locked=false,steps=[];
+let lastCorrectJuncIdx=-1; // tracks which junction index correct arm actually landed on
+
+function buildSteps(){
+  steps=[];
+  JUNCTIONS=[];
+
+  const CONNECTOR=110; // gap between arm tip and next junction
+  const MARGIN=200;    // keep junctions away from canvas edges
+  const STEP_LEN=ARM+CONNECTOR; // full distance per step
+
+  let jx=420, jy=ENTRY_Y;
+  let lastDir=0; // direction we last travelled (0=right initially)
+  let carried=ri(8,Math.max(8,Math.min(50,DIFFS[currentDiff].maxN/10)));
+
+  // Track corridor rectangles to avoid crossing them
+  // Each corridor: {ax,ay,bx,by} — the segment from junction to next junction
+  const corridors=[];
+  // Entry corridor
+  corridors.push({ax:0,ay:ENTRY_Y,bx:jx,by:jy});
+
+  function corridorOverlaps(fromX,fromY,toX,toY){
+    // Skip the junction square area at the start point to avoid false positives
+    const skip=PW+15;
+    const dx=toX-fromX,dy=toY-fromY,len=Math.sqrt(dx*dx+dy*dy)||1;
+    const sx=fromX+dx/len*skip, sy=fromY+dy/len*skip;
+    const pad=PW/2+8;
+    const nMinX=Math.min(sx,toX),nMaxX=Math.max(sx,toX);
+    const nMinY=Math.min(sy,toY),nMaxY=Math.max(sy,toY);
+    for(const c of corridors){
+      // Skip the corridor that ends at our from point (the one we arrived on)
+      if(Math.abs(c.bx-fromX)<2&&Math.abs(c.by-fromY)<2) continue;
+      const cMinX=Math.min(c.ax,c.bx),cMaxX=Math.max(c.ax,c.bx);
+      const cMinY=Math.min(c.ay,c.by),cMaxY=Math.max(c.ay,c.by);
+      if(nMinX-pad<cMaxX+pad&&nMaxX+pad>cMinX-pad&&
+         nMinY-pad<cMaxY+pad&&nMaxY+pad>cMinY-pad) return true;
+    }
+    return false;
+  }
+
+  for(let s=0;s<10;s++){
+    const{qs,ans}=genQ(carried,currentDiff);
+    const incomingAngle=(lastDir+180)%360;
+
+    // All directions that are valid for the correct arm to take:
+    // must not go back, must stay in bounds, must not cross existing corridors
+    const validFwd=[0,90,180,270].filter(a=>{
+      if(a===incomingAngle) return false; // don't go back
+      const r=a*Math.PI/180;
+      const nx=jx+Math.cos(r)*STEP_LEN;
+      const ny=jy+Math.sin(r)*STEP_LEN;
+      if(nx<=MARGIN||nx>=CW-MARGIN||ny<=MARGIN||ny>=CH-MARGIN) return false;
+      if(corridorOverlaps(jx,jy,nx,ny)) return false;
+      return true;
+    });
+
+    // Pick correct direction: truly random among all valid options
+    // No preference for turns or straight — equal probability for each
+    let correctAngle;
+    if(validFwd.length>0){
+      correctAngle=validFwd[ri(0,validFwd.length-1)];
+    } else {
+      // Fallback: just don't go back
+      correctAngle=[0,90,180,270].find(a=>a!==incomingAngle)||0;
+    }
+
+    const cr=correctAngle*Math.PI/180;
+    const nx=jx+Math.cos(cr)*STEP_LEN;
+    const ny=jy+Math.sin(cr)*STEP_LEN;
+    corridors.push({ax:jx,ay:jy,bx:nx,by:ny});
+    lastDir=correctAngle;
+
+    // Wrong arms: any direction that fits on canvas (not backward, not correct)
+    // These are dead-end circles — the path never continues past them
+    const wrongPool=[0,90,180,270].filter(a=>{
+      if(a===correctAngle||a===incomingAngle) return false;
+      const r=a*Math.PI/180;
+      const wx=jx+Math.cos(r)*ARM, wy=jy+Math.sin(r)*ARM;
+      return wx>80&&wx<CW-80&&wy>80&&wy<CH-80;
+    });
+    shuffleArr(wrongPool);
+    const armAngles=[correctAngle,...wrongPool.slice(0,Math.min(2,wrongPool.length))];
+
+    const ws=wrongAnswers(ans,armAngles.length-1,currentDiff);
+    let wi=0;
+    const arms=armAngles.map((angle,idx)=>{
+      const r=angle*Math.PI/180;
+      const isCorrect=(idx===0);
+      return {
+        a:angle, tx:jx+Math.cos(r)*ARM, ty:jy+Math.sin(r)*ARM,
+        len:ARM, c:isCorrect, geo:isCorrect,
+        answer:isCorrect?String(ans):(ws[wi++]||String(ans+ri(1,5))),
+        state:'pending',
+      };
+    });
+    shuffleArr(arms); // randomise display order
+
+    JUNCTIONS.push({jx,jy,arms});
+    steps.push({qs,ans,carried,arms});
+    carried=ans;
+    jx=nx; jy=ny; // advance to next junction position
+  }
+
+  // Exit: push to canvas edge in final direction
+  const lastCorrect=steps[9].arms.find(a=>a.c);
+  const lcr=lastCorrect.a*Math.PI/180;
+  const edx=Math.cos(lcr), edy=Math.sin(lcr);
+  if(Math.abs(edx)>Math.abs(edy)){
+    EXIT_X=edx>0?CW-5:5; EXIT_Y=lastCorrect.ty;
+  } else {
+    EXIT_X=lastCorrect.tx; EXIT_Y=edy>0?CH-5:5;
+  }
+}
+
+// ============================================================
+//  TIMER
+// ============================================================
+function startTimer(){
+  clearInterval(timerInterval);
+  elapsedSecs=0;
+  timerInterval=setInterval(()=>{
+    elapsedSecs++;
+    updateTimerDisplay();
+  },1000);
+}
+function stopTimer(){ clearInterval(timerInterval); }
+function updateTimerDisplay(){
+  const el=document.getElementById('hud-timer');
+  if(el) el.textContent='⏱ '+(elapsedSecs||0)+'s';
+}
+function bonusTime(secs){
+  elapsedSecs=Math.max(0,elapsedSecs-secs);
+  updateTimerDisplay();
+  const el=document.getElementById('hud-timer');
+  if(el){el.classList.add('bonus');setTimeout(()=>el.classList.remove('bonus'),700);}
+  showToast('-'+secs+'s time bonus! ⚡','bonus');
+}
+
+// ============================================================
+//  PATH SHAPE (organic wobbly edges, properly rounded corners)
+// ============================================================
+
+// Deterministic wobble based on position
+function wob(x,y,side,seed){
+  return Math.sin(x*0.09+y*0.06+seed*2.1+side*5.3)*3.2
+       + Math.sin(x*0.14+y*0.10+seed*4.9+side*2.7)*2.2;
+}
+
+function buildPathShape(segments){
+  // We render the path in TWO passes:
+  // Pass 1: A simple solid rectangle for each segment (no wobble) — this guarantees
+  //         zero gaps at ALL junctions. This is the base fill.
+  // Pass 2: Wobbly overlay drawn on top using globalCompositeOperation to add
+  //         organic texture without creating gaps.
+  // This completely eliminates green squares at junctions.
+  const hw=PW/2;
+
+  // Collect all unique junction points
+  const jPts=new Set();
+  segments.forEach(s=>jPts.add(Math.round(s.x1)+','+Math.round(s.y1)));
+
+  // Build a solid (no-wobble) path for clean fill
+  const solid=new Path2D();
+  segments.forEach(({x1,y1,x2,y2})=>{
+    const dx=x2-x1,dy=y2-y1;
+    const len=Math.sqrt(dx*dx+dy*dy)||1;
+    const px=-dy/len*hw, py=dx/len*hw;
+    solid.moveTo(x1+px,y1+py);
+    solid.lineTo(x2+px,y2+py);
+    solid.lineTo(x2-px,y2-py);
+    solid.lineTo(x1-px,y1-py);
+    solid.closePath();
+    // Circle cap at both ends — circles always cover junction gaps regardless of angle
+    solid.moveTo(x1+hw,y1); solid.arc(x1,y1,hw+1,0,Math.PI*2);
+    solid.moveTo(x2+hw,y2); solid.arc(x2,y2,hw+1,0,Math.PI*2);
+  });
+  return solid;
+}
+
+// Separate function to draw the wobbly edge overlay (called after solid fill)
+function drawWobblyOverlay(segs){
+  const hw=PW/2;
+  const jPts=new Set();
+  segs.forEach(s=>jPts.add(Math.round(s.x1)+','+Math.round(s.y1)));
+
+  segs.forEach(({x1,y1,x2,y2},si)=>{
+    const dx=x2-x1,dy=y2-y1;
+    const len=Math.sqrt(dx*dx+dy*dy)||1;
+    const ux=dx/len,uy=dy/len;
+    const px=-uy,py=ux;
+    const seed=si*4.1+x1*0.013+y1*0.017;
+    const isJuncX2=jPts.has(Math.round(x2)+','+Math.round(y2));
+    const nSamples=Math.max(6,Math.ceil(len/22));
+
+    const top=[],bot=[];
+    for(let i=0;i<=nSamples;i++){
+      const t=i/nSamples;
+      const bx=x1+dx*t,by=y1+dy*t;
+      top.push({x:bx+px*(hw+wob(bx,by,+1,seed)),y:by+py*(hw+wob(bx,by,+1,seed))});
+      bot.push({x:bx-px*(hw+wob(bx,by,-1,seed)),y:by-py*(hw+wob(bx,by,-1,seed))});
+    }
+
+    // Draw wobble as a filled SAND shape on top of the solid fill
+    C.beginPath();
+    C.moveTo(top[0].x,top[0].y);
+    for(let i=1;i<top.length;i++) C.lineTo(top[i].x,top[i].y);
+    if(!isJuncX2){
+      C.arc(x2,y2,hw,Math.atan2(py,px)+Math.atan2(dy,dx),
+            Math.atan2(-py,-px)+Math.atan2(dy,dx),false);
+    }
+    for(let i=bot.length-1;i>=0;i--) C.lineTo(bot[i].x,bot[i].y);
+    C.closePath();
+    C.fillStyle=SAND;
+    C.fill();
+  });
+}
+
+// ============================================================
+//  HEDGE RENDERING
+// ============================================================
+function drawBlob(ctx,bx,by,r,t,np){
+  np=np||7;
+  const cols=['#1a5c1e','#1e6b22','#237027','#28792b','#1d6f25','#226820','#1f7224'];
+  const hi  =['#2d8c32','#339438','#39a03e','#3cac42','#2f9438','#33902e','#38a036'];
+  const seed=bx*0.11+by*0.073;
+  const st=Math.PI*2/np;
+  ctx.beginPath();
+  const pts=[];
+  for(let i=0;i<np;i++){
+    const w=0.52+0.48*Math.sin(i*2.1+seed);
+    pts.push({x:bx+Math.cos(st*i)*r*w,y:by+Math.sin(st*i)*r*w});
+  }
+  ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=0;i<np;i++){
+    const p0=pts[i],p1=pts[(i+1)%np];
+    ctx.quadraticCurveTo(p0.x,p0.y,(p0.x+p1.x)/2,(p0.y+p1.y)/2);
+  }
+  ctx.closePath();
+  ctx.fillStyle=cols[t%7]; ctx.fill();
+  ctx.beginPath(); ctx.arc(bx-r*.24,by-r*.24,r*.28,0,Math.PI*2);
+  ctx.fillStyle=hi[t%7]+'66'; ctx.fill();
+}
+
+function bakeHedge(){
+  const h=offHedge.getContext('2d');
+  h.clearRect(0,0,CW,CH);
+
+  // ── Base grass with variation ──────────────────────────────
+  h.fillStyle='#3a8c3f'; h.fillRect(0,0,CW,CH);
+
+  // Darker/lighter grass patches
+  const gPatches=[
+    {x:200,y:300,r:320,c:'#2e7d32'},{x:800,y:200,r:280,c:'#388e3c'},
+    {x:1400,y:350,r:300,c:'#2e7d32'},{x:300,y:900,r:260,c:'#43a047'},
+    {x:1000,y:800,r:290,c:'#2e7d32'},{x:1700,y:600,r:270,c:'#388e3c'},
+    {x:600,y:1200,r:250,c:'#2e7d32'},{x:1400,y:1100,r:260,c:'#43a047'},
+    {x:2000,y:450,r:240,c:'#2e7d32'},{x:1900,y:1100,r:230,c:'#43a047'},
+    {x:100,y:500,r:200,c:'#43a047'},{x:500,y:1400,r:220,c:'#2e7d32'},
+  ];
+  gPatches.forEach(p=>{
+    const g=h.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+    g.addColorStop(0,p.c+'dd'); g.addColorStop(1,'transparent');
+    h.fillStyle=g; h.fillRect(0,0,CW,CH);
+  });
+
+  // ── Grass texture (short curved lines) ────────────────────
+  h.strokeStyle='#2e7d32'; h.lineWidth=1.5; h.lineCap='round';
+  for(let i=0;i<4000;i++){
+    const gx=ri(0,CW),gy=ri(0,CH);
+    const len=ri(4,10),ang=(Math.random()-0.5)*1.2;
+    h.beginPath();
+    h.moveTo(gx,gy);
+    h.quadraticCurveTo(gx+Math.cos(ang-0.3)*len*0.5,gy+Math.sin(ang-0.3)*len*0.5-len*0.3,
+                       gx+Math.cos(ang)*len,gy+Math.sin(ang)*len);
+    h.globalAlpha=0.5+Math.random()*0.4;
+    h.stroke();
+  }
+  h.globalAlpha=1;
+
+  // ── Dark grass clusters ───────────────────────────────────
+  h.strokeStyle='#1b5e20'; h.lineWidth=1.2;
+  for(let i=0;i<2000;i++){
+    const gx=ri(0,CW),gy=ri(0,CH);
+    h.beginPath();h.moveTo(gx,gy);h.lineTo(gx+ri(-3,3),gy-ri(3,8));
+    h.globalAlpha=0.3+Math.random()*0.4; h.stroke();
+  }
+  h.globalAlpha=1;
+
+  // ── Small flowers ─────────────────────────────────────────
+  const flowerCols=['#e91e63','#9c27b0','#2196f3','#ff9800','#fff'];
+  for(let i=0;i<300;i++){
+    const fx=ri(0,CW),fy=ri(0,CH);
+    const fc=flowerCols[ri(0,flowerCols.length-1)];
+    h.fillStyle=fc; h.beginPath(); h.arc(fx,fy,ri(2,4),0,Math.PI*2); h.fill();
+    h.fillStyle='#ffff00'; h.beginPath(); h.arc(fx,fy,1.2,0,Math.PI*2); h.fill();
+  }
+
+  // ── Rocks ─────────────────────────────────────────────────
+  for(let i=0;i<80;i++){
+    const rx=ri(0,CW),ry=ri(0,CH);
+    const rr=ri(6,18);
+    // Shadow
+    h.fillStyle='rgba(0,0,0,.25)'; h.beginPath(); h.ellipse(rx+3,ry+4,rr,rr*0.6,0,0,Math.PI*2); h.fill();
+    // Rock body
+    const rg=h.createRadialGradient(rx-rr*0.3,ry-rr*0.3,0,rx,ry,rr);
+    rg.addColorStop(0,'#ccc'); rg.addColorStop(0.6,'#999'); rg.addColorStop(1,'#666');
+    h.fillStyle=rg; h.beginPath(); h.ellipse(rx,ry,rr,rr*0.75,Math.random()*0.5,0,Math.PI*2); h.fill();
+    h.strokeStyle='#555'; h.lineWidth=1; h.stroke();
+  }
+
+  // ── Trees (top-down view with foliage canopy and trunk shadow) ──
+  for(let i=0;i<140;i++){
+    const tx=ri(0,CW),ty=ri(0,CH);
+    const type=ri(0,2); // 0=round, 1=pine, 2=small bush
+    drawTopDownTree(h,tx,ty,type,(i*7+tx+ty)%7);
+  }
+
+  // ── Crystal/plant clusters ─────────────────────────────────
+  for(let i=0;i<120;i++){
+    const cx=ri(0,CW),cy=ri(0,CH);
+    drawCrystalCluster(h,cx,cy,(i*3)%4);
+  }
+}
+
+function drawTopDownTree(h,x,y,type,colorIdx){
+  const treeGreens=['#2e7d32','#388e3c','#1b5e20','#33691e','#558b2f','#1a7a2a','#27963a'];
+  const treeDark  =['#1b5e20','#2e7d32','#1a5c1e','#255215','#3a6e1e','#145c1e','#1e7030'];
+  const treeLight =['#43a047','#4caf50','#388e3c','#558b2f','#7cb342','#2e8b3a','#3daa4a'];
+
+  if(type===1){
+    // Pine tree - top down looks like a dark green spiky asterisk
+    const r=ri(14,28);
+    // Shadow
+    h.fillStyle='rgba(0,0,0,.2)'; h.beginPath(); h.ellipse(x+r*0.3,y+r*0.3,r,r*0.8,0.4,0,Math.PI*2); h.fill();
+    // Trunk circle
+    h.fillStyle='#6d4c41'; h.beginPath(); h.arc(x,y,r*0.25,0,Math.PI*2); h.fill();
+    // Foliage (dark spiky)
+    h.fillStyle=treeDark[colorIdx%7];
+    for(let sp=0;sp<8;sp++){
+      const a=sp*Math.PI*2/8;
+      h.beginPath(); h.moveTo(x,y);
+      h.lineTo(x+Math.cos(a-0.3)*r,y+Math.sin(a-0.3)*r);
+      h.lineTo(x+Math.cos(a)*r*1.1,y+Math.sin(a)*r*1.1);
+      h.lineTo(x+Math.cos(a+0.3)*r,y+Math.sin(a+0.3)*r);
+      h.closePath(); h.fill();
+    }
+    // Inner highlight
+    h.fillStyle=treeLight[colorIdx%7]+'88';
+    h.beginPath(); h.arc(x-r*0.15,y-r*0.15,r*0.45,0,Math.PI*2); h.fill();
+  } else if(type===2){
+    // Small bush
+    const r=ri(8,18);
+    h.fillStyle='rgba(0,0,0,.18)'; h.beginPath(); h.ellipse(x+3,y+3,r,r*0.8,0,0,Math.PI*2); h.fill();
+    h.fillStyle=treeGreens[colorIdx%7]; h.beginPath(); h.arc(x,y,r,0,Math.PI*2); h.fill();
+    h.fillStyle=treeLight[colorIdx%7]+'99'; h.beginPath(); h.arc(x-r*0.2,y-r*0.2,r*0.45,0,Math.PI*2); h.fill();
+  } else {
+    // Round tree - classic top-down RPG style
+    const r=ri(20,42);
+    // Drop shadow
+    h.fillStyle='rgba(0,0,0,.25)'; h.beginPath(); h.ellipse(x+r*0.25,y+r*0.3,r*1.05,r*0.85,0,0,Math.PI*2); h.fill();
+    // Trunk (small dark circle at centre)
+    h.fillStyle='#5d4037'; h.beginPath(); h.arc(x,y,r*0.22,0,Math.PI*2); h.fill();
+    // Main foliage
+    h.fillStyle=treeGreens[colorIdx%7]; h.beginPath(); h.arc(x,y,r,0,Math.PI*2); h.fill();
+    // Darker outline (bottom right)
+    h.strokeStyle=treeDark[colorIdx%7]; h.lineWidth=3;
+    h.beginPath(); h.arc(x,y,r,Math.PI*0.1,Math.PI*1.1); h.stroke();
+    // Highlight patch (top left)
+    h.fillStyle=treeLight[colorIdx%7]+'bb';
+    h.beginPath(); h.arc(x-r*0.28,y-r*0.28,r*0.48,0,Math.PI*2); h.fill();
+    // Face-like texture marks
+    h.strokeStyle=treeDark[colorIdx%7]+'99'; h.lineWidth=1.5;
+    h.beginPath();
+    h.arc(x+r*0.1,y+r*0.15,r*0.22,0.3,Math.PI-0.3);
+    h.stroke();
+  }
+}
+
+function drawCrystalCluster(h,x,y,type){
+  const cols=['#80deea','#b39ddb','#90caf9','#a5d6a7'];
+  const dark =['#00838f','#512da8','#1565c0','#2e7d32'];
+  const c=cols[type],d=dark[type];
+  const n=ri(2,5);
+  for(let i=0;i<n;i++){
+    const cx=x+ri(-8,8),cy=y+ri(-8,8);
+    const ch=ri(6,14),cw=ri(3,6),ang=Math.random()*Math.PI*2;
+    h.save(); h.translate(cx,cy); h.rotate(ang);
+    h.fillStyle=c;
+    h.beginPath();
+    h.moveTo(0,-ch);h.lineTo(cw/2,-ch*0.3);h.lineTo(cw/2,ch*0.4);
+    h.lineTo(0,ch*0.6);h.lineTo(-cw/2,ch*0.4);h.lineTo(-cw/2,-ch*0.3);
+    h.closePath(); h.fill();
+    h.strokeStyle=d; h.lineWidth=1; h.stroke();
+    h.fillStyle='rgba(255,255,255,.5)';
+    h.beginPath(); h.moveTo(-cw*0.3,-ch*0.8); h.lineTo(-cw*0.1,-ch*0.2); h.lineTo(-cw*0.3,-ch*0.1); h.closePath(); h.fill();
+    h.restore();
+  }
+}
+
+// ============================================================
+//  SEGMENT COLLECTION
+// ============================================================
+function collectSegments(){
+  const segs=[];
+  // Entry: canvas left edge → J0
+  segs.push({x1:0,y1:ENTRY_Y,x2:JUNCTIONS[0].jx,y2:JUNCTIONS[0].jy});
+
+  // Done steps: use arm.c (= arm.geo) — path follows the correct answer direction
+  for(let s=0;s<currentStep&&s<10;s++){
+    const j=JUNCTIONS[s];
+    const fwd=steps[s].arms.find(a=>a.c);
+    if(!fwd) continue;
+    segs.push({x1:j.jx,y1:j.jy,x2:fwd.tx,y2:fwd.ty});
+    if(s+1<10) segs.push({x1:fwd.tx,y1:fwd.ty,x2:JUNCTIONS[s+1].jx,y2:JUNCTIONS[s+1].jy});
+  }
+
+  // Current junction: show all active/wrong arm corridors
+  if(currentStep<10){
+    const j=JUNCTIONS[currentStep];
+    steps[currentStep].arms.forEach(arm=>{
+      if(arm.state==='pending'||arm.state==='removed') return;
+      segs.push({x1:j.jx,y1:j.jy,x2:arm.tx,y2:arm.ty});
+    });
+  }
+
+  // Exit corridor
+  if(currentStep>=10){
+    const fwd=steps[9].arms.find(a=>a.c);
+    if(fwd) segs.push({x1:fwd.tx,y1:fwd.ty,x2:EXIT_X,y2:EXIT_Y});
+  }
+
+  return segs;
+}
+
+// ============================================================
+//  MAIN RENDER
+// ============================================================
+let clickTargets=[];
+
+function render(){
+  clickTargets=[];
+  C.clearRect(0,0,CW,CH);
+
+  // 1. Hedge background
+  C.drawImage(offHedge,0,0);
+
+  // 2. Path shape: solid base (no gaps) then wobbly overlay
+  const segs=collectSegments();
+  const ps=buildPathShape(segs);
+  C.save(); C.fillStyle=SAND; C.fill(ps); C.restore();
+  // Wobbly organic edges on top of solid fill
+  C.save(); drawWobblyOverlay(segs); C.restore();
+
+  // 3. Edge blobs (wall texture) + re-stamp path
+  drawEdgeBlobs(segs,ps);
+
+  // 4. Sandy seal at entry & exit
+  C.fillStyle=SAND;
+  C.fillRect(0,ENTRY_Y-Math.floor(PW/2),ENTRY_X+25,PW);
+  if(currentStep>=10){
+    const lf=steps[9]&&steps[9].arms.find(a=>a.c);
+    const ea=lf?lf.a:0;
+    if(ea===0||ea===180){
+      // Horizontal exit — seal horizontal strip
+      const sx=ea===0?EXIT_X-35:EXIT_X;
+      C.fillRect(sx,EXIT_Y-Math.floor(PW/2),38,PW);
+    } else {
+      // Vertical exit — seal vertical strip
+      const sy=ea===90?EXIT_Y-35:EXIT_Y;
+      C.fillRect(EXIT_X-Math.floor(PW/2),sy,PW,38);
+    }
+  }
+
+  // 5. Dead-end walls
+  for(let s=0;s<=currentStep&&s<10;s++){
+    const j=JUNCTIONS[s];
+    steps[s].arms.forEach(arm=>{
+      if(arm.state!=='wrong') return;
+      const dx=j.jx-arm.tx,dy=j.jy-arm.ty;
+      const d=Math.sqrt(dx*dx+dy*dy)||1;
+      const ux=dx/d,uy=dy/d;
+      for(let ring=0;ring<3;ring++)
+        for(let i=0;i<8;i++){
+          const a=i*Math.PI*2/8;
+          drawBlob(C,arm.tx+ux*ring*8+Math.cos(a)*(PW/2+4),
+                     arm.ty+uy*ring*8+Math.sin(a)*(PW/2+4),13,i%7,7);
+        }
+      drawBlob(C,arm.tx,arm.ty,15,0,7);
+    });
+  }
+
+  // 6. Player dot (before circles — circles draw on top)
+  drawPlayer(avatarX,avatarY);
+
+  // 7. Answer circles — ONLY show for current step
+  if(currentStep<10){
+    const step=steps[currentStep];
+    step.arms.forEach(arm=>{
+      if(arm.state==='pending'||arm.state==='removed') return;
+      if(arm.state==='active'||arm.state==='wrong'){
+        const clickable=arm.state==='active'&&!locked;
+        const isHov=hoveredArm===arm;
+        drawCircle(arm.tx,arm.ty,arm.answer,arm.state==='wrong'?'wrong':'active',clickable,isHov);
+        if(clickable) clickTargets.push({x:arm.tx,y:arm.ty,r:CR+6,cb:()=>handleAnswer(currentStep,arm)});
+      }
+    });
+  }
+
+  // 8. Question labels + NPC at junction for current step
+  for(let s=0;s<=currentStep&&s<10;s++){
+    const j=JUNCTIONS[s];
+    const step=steps[s];
+    const isDone=s<currentStep;
+    if(isDone){
+      // Done steps: don't show question — path is clear
+    } else {
+      // NPC stands between player and junction — close enough to player
+      // so the speech bubble above them is clear of the answer circles at the junction
+      const fx2=s===0?ENTRY_X:JUNCTIONS[s-1].jx;
+      const fy2=s===0?ENTRY_Y:JUNCTIONS[s-1].jy;
+      const npcX=fx2+(j.jx-fx2)*0.45;
+      const npcY=fy2+(j.jy-fy2)*0.45;
+      drawNPC(npcX,npcY,step.qs);
+    }
+  }
+
+  // 9. Gates
+  drawGate(ENTRY_X,ENTRY_Y,false);
+  if(currentStep>=10) drawGate(EXIT_X,EXIT_Y,true);
+}
+
+function drawEdgeBlobs(segs,ps){
+  const hw=PW/2, dist=hw+19;
+  segs.forEach(({x1,y1,x2,y2})=>{
+    const dx=x2-x1,dy=y2-y1;
+    const len=Math.sqrt(dx*dx+dy*dy)||1;
+    const px=-dy/len,py=dx/len;
+    const steps=Math.max(3,Math.ceil(len/18));
+    for(let s=0;s<=steps;s++){
+      const t=s/steps;
+      const bx=x1+dx*t,by=y1+dy*t;
+      const sd=Math.sin(bx*0.14+by*0.25+x1*0.04);
+      [-1,1].forEach(side=>{
+        const r=6+Math.abs(Math.sin(s*1.9+bx*0.04))*5;
+        drawBlob(C,bx+px*dist*side,by+py*dist*side,r,Math.floor(Math.abs(sd*4.5))%7,ri(5,8));
+      });
+    }
+  });
+  // Re-stamp sandy path
+  C.save(); C.fillStyle=SAND; C.fill(ps); C.restore();
+  // Dark inner path edge for raised look
+  segs.forEach(({x1,y1,x2,y2})=>{
+    const dx=x2-x1,dy=y2-y1;
+    const len=Math.sqrt(dx*dx+dy*dy)||1;
+    const px=-dy/len,py=dx/len;
+    const edge=hw-3;
+    C.strokeStyle='rgba(100,60,10,0.10)'; C.lineWidth=3; C.lineCap='butt';
+    [-1,1].forEach(side=>{
+      C.beginPath();
+      C.moveTo(x1+px*edge*side,y1+py*edge*side);
+      C.lineTo(x2+px*edge*side,y2+py*edge*side);
+      C.stroke();
+    });
+  });
+  // Subtle path pebble texture dots
+  segs.forEach(({x1,y1,x2,y2})=>{
+    const dx=x2-x1,dy=y2-y1;
+    const len=Math.sqrt(dx*dx+dy*dy)||1;
+    const steps=Math.ceil(len/22);
+    for(let s=0;s<=steps;s++){
+      const t=s/steps;
+      const bx=x1+dx*t,by=y1+dy*t;
+      const sd=Math.sin(bx*0.31+by*0.19+x1*0.07);
+      const off=(sd*0.5)*hw*0.6;
+      const r=1.5+Math.abs(sd)*2;
+      C.fillStyle='rgba(120,75,20,0.22)';
+      C.beginPath(); C.arc(bx+off,by+off*0.3,r,0,Math.PI*2); C.fill();
+    }
+  });
+}
+
+// ============================================================
+//  UI ELEMENTS
+// ============================================================
+function drawCircle(x,y,text,state,clickable,isHovered){
+  const r=CR;
+  let fill,stroke,tc;
+  if(state==='active')   {fill='#f5f2eb';stroke='#7a6a50';tc='#2c1f0a';}
+  else if(state==='correct'){fill='#c8e6c9';stroke='#2e7d32';tc='#1b5e20';}
+  else if(state==='wrong')  {fill='#ffcdd2';stroke='#c62828';tc='#7f0000';}
+  else                      {fill='#e0ddd9';stroke='#9e9894';tc='#666';}
+  if(isHovered&&state==='active'){fill='#fff3e0';stroke='#e65100';}
+  const drawR=isHovered?r+4:r;
+  C.fillStyle='rgba(0,0,0,.16)';
+  C.beginPath();C.ellipse(x,y+7,drawR,drawR*0.38,0,0,Math.PI*2);C.fill();
+  if(isHovered){C.fillStyle='rgba(230,100,0,.18)';C.beginPath();C.arc(x,y,drawR+5,0,Math.PI*2);C.fill();}
+  C.fillStyle=fill;C.beginPath();C.arc(x,y,drawR,0,Math.PI*2);C.fill();
+  C.strokeStyle=stroke;C.lineWidth=isHovered?4.5:3.5;C.beginPath();C.arc(x,y,drawR,0,Math.PI*2);C.stroke();
+  if(clickable){C.fillStyle='rgba(255,255,255,.26)';C.beginPath();C.arc(x-9,y-9,drawR*0.36,0,Math.PI*2);C.fill();}
+  C.fillStyle=tc;
+  const tl=String(text).length;
+  const fs2=tl<=3?19:tl===4?16:13;
+  C.font='bold '+fs2+'px Fredoka One,cursive';
+  C.textAlign='center';C.textBaseline='middle';
+  C.fillText(text,x,isHovered?y-2:y);
+  // (key hints removed)
+}
+
+// ── TOP-DOWN CHARACTER HELPERS ──────────────────────────────
+function darkenHex(hex, amt){
+  let n=parseInt(hex.replace('#',''),16);
+  let r=Math.max(0,(n>>16)-amt);
+  let g=Math.max(0,((n>>8)&0xff)-amt);
+  let b=Math.max(0,(n&0xff)-amt);
+  return '#'+(((r<<16)|(g<<8)|b).toString(16).padStart(6,'0'));
+}
+
+// Top-down character. faceAngle = radians direction character is FACING
+// (angle toward their "front" — where eyes point). 0=right, PI/2=down, PI=left, -PI/2=up
+function drawTopDownChar(x,y,hairCol,cloakCol,isPlayer,faceAngle){
+  if(faceAngle===undefined) faceAngle=Math.PI/2; // default face down
+  C.save();
+  C.translate(x,y);
+  const bob = isPlayer && avatarWalking ? Math.sin(walkCycle)*1.5 : 0;
+
+  // Ground shadow
+  C.fillStyle='rgba(0,0,0,.2)';
+  C.beginPath(); C.ellipse(2, 8+bob, 14, 5, 0, 0, Math.PI*2); C.fill();
+
+  // Cloak/shoulders — rotated so "front" faces faceAngle
+  C.save();
+  C.rotate(faceAngle-Math.PI/2); // rotate so down-facing (PI/2) becomes front
+  C.fillStyle=cloakCol;
+  C.beginPath(); C.ellipse(0, 5+bob, 13, 9, 0, 0, Math.PI*2); C.fill();
+  C.strokeStyle=darkenHex(cloakCol, 35); C.lineWidth=1.5;
+  C.beginPath(); C.moveTo(0, 0+bob); C.lineTo(0, 13+bob); C.stroke();
+  C.strokeStyle='rgba(255,255,255,.22)'; C.lineWidth=2;
+  C.beginPath(); C.arc(0, 5+bob, 13, -Math.PI*0.85, -Math.PI*0.15); C.stroke();
+  C.restore();
+
+  // Head (hair circle, always drawn, rotated for facing)
+  C.save();
+  C.rotate(faceAngle-Math.PI/2);
+  // Hair fills top of head
+  C.fillStyle=hairCol;
+  C.beginPath(); C.arc(0, -1+bob, 13, 0, Math.PI*2); C.fill();
+  // Hair texture
+  C.strokeStyle=darkenHex(hairCol, 28); C.lineWidth=1.8; C.lineCap='round';
+  [[-5,-3,7],[-1,-3,5],[4,-3,6]].forEach(([cx2,cy2,r])=>{
+    C.beginPath(); C.arc(cx2, cy2+bob, r, Math.PI*0.7, Math.PI*2.3); C.stroke();
+  });
+  // Face strip (in the "forward" direction = bottom of head in rotated space)
+  C.save();
+  C.beginPath(); C.arc(0, -1+bob, 13, 0, Math.PI*2); C.clip();
+  C.fillStyle='#c8956a';
+  C.fillRect(-8, 5+bob, 16, 8);
+  C.fillStyle='#1a1a1a';
+  C.beginPath(); C.arc(-3.5, 8+bob, 1.8, 0, Math.PI*2); C.fill();
+  C.beginPath(); C.arc( 3.5, 8+bob, 1.8, 0, Math.PI*2); C.fill();
+  C.restore();
+  // Head outline
+  C.strokeStyle=darkenHex(hairCol, 45); C.lineWidth=1.8;
+  C.beginPath(); C.arc(0, -1+bob, 13, 0, Math.PI*2); C.stroke();
+  C.restore();
+
+  C.restore();
+}
+
+// NPC characters (top-down view like player)
+const NPC_CLOAK=['#e57373','#81c784','#64b5f6','#ffb74d','#ba68c8','#4dd0e1','#f06292'];
+const NPC_HAIR =['#4a1a00','#1a1a4a','#3d3a00','#0d3d1a','#4a001a','#1a3d4a','#3d1a4a'];
+
+function drawNPC(x,y,question){
+  const ci=currentStep%7;
+  const faceAngle=Math.atan2(avatarY-y, avatarX-x);
+  drawTopDownChar(x,y,NPC_HAIR[ci],NPC_CLOAK[ci],false,faceAngle);
+  drawSpeechBubble(x, y, question);
+}
+
+function drawSpeechBubble(x,y,text){
+  // Always directly above the NPC — simple, reliable, never overlaps circles
+  const label=text+' =';
+  C.font='bold 17px Fredoka One,cursive';
+  const tw=C.measureText(label).width;
+  const pw=Math.max(tw+32,100),ph=44,r=14;
+  // Bubble centred on NPC x, above NPC y
+  const bx=Math.max(20, Math.min(CW-pw-20, x-pw/2));
+  const by=Math.max(20, y-ph-60);
+
+  // Shadow
+  C.fillStyle='rgba(0,0,0,.22)';
+  rrect(bx+3,by+4,pw,ph,r);C.fill();
+
+  // Bubble body
+  C.fillStyle='#fffde7';
+  rrect(bx,by,pw,ph,r);C.fill();
+  C.strokeStyle='#f57c00';C.lineWidth=3;
+  rrect(bx,by,pw,ph,r);C.stroke();
+
+  // Tail: straight down from bubble bottom-centre to NPC head
+  const tailX=bx+pw/2;
+  const tailTip=y-18;
+  C.fillStyle='#fffde7';
+  C.beginPath();
+  C.moveTo(tailX-9,by+ph);
+  C.lineTo(tailX,tailTip);
+  C.lineTo(tailX+9,by+ph);
+  C.closePath(); C.fill();
+  C.strokeStyle='#f57c00'; C.lineWidth=2.5; C.lineCap='round';
+  C.beginPath(); C.moveTo(tailX-9,by+ph); C.lineTo(tailX,tailTip); C.stroke();
+  C.beginPath(); C.moveTo(tailX+9,by+ph); C.lineTo(tailX,tailTip); C.stroke();
+
+  // Text centred in bubble
+  C.fillStyle='#bf360c';
+  C.font='bold 17px Fredoka One,cursive';
+  C.textAlign='center';C.textBaseline='middle';
+  C.fillText(label, bx+pw/2, by+ph/2);
+}
+
+
+function drawQLabel(x,y,text,done){
+  const label=text+' =';
+  C.font='bold 17px Fredoka One,cursive';
+  const tw=C.measureText(label).width;
+  const pw=tw+30,ph=38,r=10;
+  const bx=x-pw/2,by=y-ph/2;
+  C.fillStyle='rgba(0,0,0,.28)';rrect(bx+2,by+3,pw,ph,r);C.fill();
+  C.fillStyle=done?'#2d6e30':'#1a3a5c';rrect(bx,by,pw,ph,r);C.fill();
+  C.strokeStyle=done?'#1b5e20':'#0d2440';C.lineWidth=2;rrect(bx,by,pw,ph,r);C.stroke();
+  C.fillStyle='#fff';C.font='bold 17px Fredoka One,cursive';
+  C.textAlign='center';C.textBaseline='middle';C.fillText(label,x,y);
+}
+
+// Walking cycle counter
+let walkCycle=0,walkRaf=null;
+function tickWalk(){
+  if(avatarWalking) walkCycle+=0.18;
+  else walkCycle*=0.85; // slow down when stopped
+  walkRaf=requestAnimationFrame(tickWalk);
+}
+
+function drawPlayer(x,y){
+  let faceAngle=0;
+  if(currentStep>=10){
+    // Face toward exit gate
+    faceAngle=Math.atan2(EXIT_Y-y, EXIT_X-x);
+  } else if(walkQueue.length>0){
+    // Face toward next waypoint while walking
+    const wp=walkQueue[0];
+    faceAngle=Math.atan2(wp.y-y, wp.x-x);
+  } else if(currentStep<10&&JUNCTIONS[currentStep]){
+    // Face toward current junction (where the NPC is)
+    const j=JUNCTIONS[currentStep];
+    faceAngle=Math.atan2(j.jy-y, j.jx-x);
+  }
+  drawTopDownChar(x, y, '#5c3a1a', '#3a6bbf', true, faceAngle);
+}
+
+function drawGate(x,y,isExit){
+  const hw=PW/2;
+
+  if(!isExit){
+    // ENTRY gate — always on left edge, path goes right, pillars above/below
+    C.fillStyle=SAND; C.fillRect(x-6,y-hw,12,PW);
+    [[x,y-hw-22],[x,y+hw]].forEach(([px2,py2])=>{
+      const pw=20,ph=24;
+      C.fillStyle='rgba(0,0,0,.28)';C.fillRect(px2-pw/2+3,py2+3,pw,ph);
+      C.fillStyle='#5c3a00';C.fillRect(px2-pw/2,py2,pw,ph);
+      C.fillStyle='#7a5010';C.fillRect(px2-pw/2+4,py2+2,6,ph-4);
+      C.fillStyle='#4a2e00';C.fillRect(px2-pw/2,py2,3,ph);
+      C.fillStyle='#8a7060';C.fillRect(px2-pw/2-2,py2-4,pw+4,6);
+    });
+    return;
+  }
+
+  // EXIT gate — direction-aware based on which canvas edge it's on
+  // Determine exit direction from final arm angle
+  const lastFwd=currentStep>=10&&steps[9]?steps[9].arms.find(a=>a.c):null;
+  const exitA=lastFwd?lastFwd.a:0; // angle of final correct arm
+  const isHoriz=(exitA===0||exitA===180); // horizontal exit = pillars above/below
+  const isVert=(exitA===90||exitA===270);  // vertical exit = pillars left/right
+
+  if(isHoriz){
+    // Horizontal path exits left or right — pillars above and below path
+    C.fillStyle=SAND; C.fillRect(x-6,y-hw,12,PW);
+    [[x,y-hw-22],[x,y+hw]].forEach(([px2,py2])=>{
+      const pw=20,ph=24;
+      C.fillStyle='rgba(0,0,0,.28)';C.fillRect(px2-pw/2+3,py2+3,pw,ph);
+      C.fillStyle='#5c3a00';C.fillRect(px2-pw/2,py2,pw,ph);
+      C.fillStyle='#7a5010';C.fillRect(px2-pw/2+4,py2+2,6,ph-4);
+      C.fillStyle='#4a2e00';C.fillRect(px2-pw/2,py2,3,ph);
+      C.fillStyle='#8a7060';C.fillRect(px2-pw/2-2,py2-4,pw+4,6);
+    });
+    // EXIT text on path, 80px inside from edge
+    const inset=exitA===0?-80:80; // left of gate if going right, right if going left
+    C.fillStyle='#1b5e20';C.font='bold 14px Fredoka One,cursive';
+    C.textAlign='center';C.textBaseline='middle';
+    C.fillText('EXIT',x+inset,y);
+  } else {
+    // Vertical path exits top or bottom — pillars left and right of path
+    C.fillStyle=SAND; C.fillRect(x-hw,y-6,PW,12);
+    [[x-hw-22,y],[x+hw,y]].forEach(([px2,py2])=>{
+      const pw=24,ph=20;
+      C.fillStyle='rgba(0,0,0,.28)';C.fillRect(px2+3,py2-ph/2+3,pw,ph);
+      C.fillStyle='#5c3a00';C.fillRect(px2,py2-ph/2,pw,ph);
+      C.fillStyle='#7a5010';C.fillRect(px2+2,py2-ph/2+4,pw-4,6);
+      C.fillStyle='#4a2e00';C.fillRect(px2,py2-ph/2,pw,3);
+      C.fillStyle='#8a7060';C.fillRect(px2-4,py2-ph/2-2,pw+4,6);
+    });
+    // EXIT text on path, 80px inside from edge
+    const inset=exitA===90?-80:80; // above gate if going down, below if going up
+    C.fillStyle='#1b5e20';C.font='bold 14px Fredoka One,cursive';
+    C.textAlign='center';C.textBaseline='middle';
+    C.fillText('EXIT',x,y+inset);
+  }
+}
+
+function rrect(x,y,w,h,r){
+  C.beginPath();C.moveTo(x+r,y);C.lineTo(x+w-r,y);
+  C.quadraticCurveTo(x+w,y,x+w,y+r);C.lineTo(x+w,y+h-r);
+  C.quadraticCurveTo(x+w,y+h,x+w-r,y+h);C.lineTo(x+r,y+h);
+  C.quadraticCurveTo(x,y+h,x,y+h-r);C.lineTo(x,y+r);
+  C.quadraticCurveTo(x,y,x+r,y);C.closePath();
+}
+
+// ============================================================
+//  HIT TEST
+// ============================================================
+function hitTest(ex,ey){
+  const rect=cv.getBoundingClientRect();
+  for(const t of clickTargets){
+    if(Math.sqrt((ex-rect.left-t.x)**2+(ey-rect.top-t.y)**2)<=t.r){t.cb();return;}
+  }
+}
+
+let hoveredArm=null;
+cv.addEventListener('mousemove',e=>{
+  if(locked||currentStep>=10){hoveredArm=null;return;}
+  const rect=cv.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  const step=steps[currentStep];
+  let found=null;
+  step.arms.forEach(arm=>{
+    if(arm.state!=='active') return;
+    if(Math.sqrt((mx-arm.tx)**2+(my-arm.ty)**2)<=CR+8) found=arm;
+  });
+  if(found!==hoveredArm){ hoveredArm=found; render(); }
+  cv.style.cursor=found?'pointer':'default';
+});
+cv.addEventListener('mouseleave',()=>{hoveredArm=null;render();cv.style.cursor='default';});
+
+cv.addEventListener('click',e=>hitTest(e.clientX,e.clientY));
+cv.addEventListener('touchend',e=>{e.preventDefault();const t=e.changedTouches[0];hitTest(t.clientX,t.clientY);},{passive:false});
+
+// ============================================================
+//  PLAYER POSITION HELPERS
+// ============================================================
+function getPlayerIdlePos(step){
+  // Player sits 22% along incoming corridor
+  const j=JUNCTIONS[step];
+  const fx=step===0?ENTRY_X:JUNCTIONS[step-1].jx;
+  const fy=step===0?ENTRY_Y:JUNCTIONS[step-1].jy;
+  return{x:fx+(j.jx-fx)*0.22, y:fy+(j.jy-fy)*0.22};
+}
+
+// ============================================================
+//  GAME LOGIC
+// ============================================================
+function startGame(diff){
+  currentDiff=diff||currentDiff;
+  streak=0;stepIdx=0;wrongTotal=0;
+  currentStep=0;locked=false;
+  buildSteps();
+  showScreen('game-screen');
+  setupCanvas();bakeHedge();
+  activateStep(0);updateHUD();
+  // Set initial avatar position
+  const pos=getPlayerIdlePos(0);
+  avatarX=pos.x;avatarY=pos.y;
+  walkQueue=[];avatarWalking=false;onWalkComplete=null;
+  // Pan to initial position instantly
+  panX=0;panY=0;tX=0;tY=0;
+  if(JUNCTIONS[0]) panTo(JUNCTIONS[0].jx,JUNCTIONS[0].jy,true);
+  render();
+  startTimer();
+  if(!walkRaf) tickWalk();
+}
+
+function activateStep(s){
+  if(s>=10) return;
+  steps[s].arms.forEach(arm=>{arm.state='active';});
+}
+
+document.getElementById('win-play-again').onclick=()=>startGame(currentDiff);
+document.getElementById('lose-play-again').onclick=()=>startGame(currentDiff);
+
+function handleAnswer(stepI,arm){
+  if(locked||stepI!==currentStep) return;
+  locked=true;
+  const step=steps[stepI];
+
+  if(arm.c){
+    arm.state='correct';
+    step.arms.forEach(a=>{if(a.state==='active')a.state='removed';});
+    streak++;stepIdx++;
+
+    // 3-in-a-row = 5 second time bonus
+    if(streak>0&&streak%3===0){
+      bonusTime(5);
+      flashBonus();
+    } else {
+      showToast('✅ Correct!','correct');
+    }
+
+    // Walk toward the correct arm tip (= forward path direction)
+    const j=JUNCTIONS[stepI];
+    const fwdArm=arm; // the arm the player clicked IS the correct arm
+    currentStep++;
+
+    // Walk: current pos → junction centre → idle pos at next step
+    // Skip the arm tip waypoint — it causes reversal when idle pos is behind it
+    const npos=currentStep<10 ? getPlayerIdlePos(currentStep) : {x:EXIT_X,y:EXIT_Y};
+    const waypoints=[
+      {x:j.jx, y:j.jy},   // pass through junction
+      {x:npos.x, y:npos.y} // arrive at idle/exit position
+    ];
+
+    // Pan camera to next junction as avatar walks
+    const panTarget=currentStep<10 && JUNCTIONS[currentStep]
+      ? {x:JUNCTIONS[currentStep].jx, y:JUNCTIONS[currentStep].jy}
+      : {x:EXIT_X, y:EXIT_Y};
+
+    render(); // show correct state before walking
+    if(currentStep<10) activateStep(currentStep);
+    updateHUD();
+
+    walkAvatarAlongPath(waypoints, panTarget, ()=>{
+      if(currentStep>=10){
+        stopTimer();
+        setTimeout(winGame,600);
+      } else {
+        locked=false;
+        render();
+      }
+    });
+
+  } else {
+    arm.state='wrong';streak=0;wrongTotal++;
+    elapsedSecs+=5; updateTimerDisplay();
+    updateHUD();
+    showToast('+5 seconds penalty! ❌','wrong');
+    render();
+    setTimeout(()=>{locked=false;render();},600);
+  }
+}
+
+function updateHUD(){
+  document.getElementById('hud-streak').textContent='🔥 '+streak;
+  document.getElementById('hud-prog').textContent='Step '+(Math.min(stepIdx+1,10))+' / 10';
+  const scoreEl=document.getElementById('hud-score');
+  if(scoreEl) scoreEl.innerHTML='✅ '+stepIdx+' &nbsp; ❌ '+wrongTotal;
+  updateTimerDisplay();
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function confirmExit(){
+  if(confirm('Exit to menu? Your progress will be lost.')) goHome();
+}
+function goHome(){
+  stopTimer();
+  renderAllBoards();
+  showScreen('title-screen');
+}
+
+let pendingScore=null;
+
+function winGame(){
+  let secs=elapsedSecs;
+  const isPerfect=(wrongTotal===0);
+  if(isPerfect){ secs=Math.max(1,secs-10); elapsedSecs=secs; updateTimerDisplay(); }
+  pendingScore={diff:currentDiff,secs,isPerfect};
+  const perfectMsg=isPerfect?'<br>🌟 <strong>Perfect game! −10 seconds bonus!</strong>':'';
+  document.getElementById('win-stats').innerHTML=
+    'Difficulty: '+DIFFS[currentDiff].label+
+    ' &nbsp;|&nbsp; Wrong: '+wrongTotal+
+    ' &nbsp;|&nbsp; Time: <strong>'+secs+'s</strong>'+perfectMsg;
+
+  const entryBox=document.getElementById('score-entry-box');
+  if(qualifiesForBoard(currentDiff,secs)){
+    entryBox.style.display='flex';
+    document.getElementById('player-name').value='';
+  } else {
+    entryBox.style.display='none';
+  }
+  showScreen('win-screen');
+}
+
+function submitScore(){
+  if(!pendingScore) return;
+  const name=document.getElementById('player-name').value.trim()||'Anonymous';
+  addScore(pendingScore.diff,name,pendingScore.secs,pendingScore.isPerfect);
+  pendingScore=null;
+  document.getElementById('score-entry-box').style.display='none';
+  renderAllBoards();
+  showToast('Score submitted! 🏆','bonus');
+}
+
+function loseGame(){
+  const secs=elapsedSecs;
+  document.getElementById('lose-stats').innerHTML=
+    'Difficulty: '+DIFFS[currentDiff].label+
+    ' &nbsp;|&nbsp; Steps: '+stepIdx+' / 10'+
+    ' &nbsp;|&nbsp; Time: '+secs+'s';
+  showScreen('lose-screen');
+}
+
+function showToast(msg,type){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),2400);
+}
+function flashBonus(){
+  const f=document.createElement('div');f.className='bflash';
+  document.body.appendChild(f);setTimeout(()=>f.remove(),700);
+}
+
+
+// ── KEYBOARD SHORTCUTS ─────────────────────────────────────
+const KEY_ANGLE={ArrowRight:0,ArrowDown:90,ArrowLeft:180,ArrowUp:270};
+document.addEventListener('keydown',e=>{
+  if(locked||currentStep>=10) return;
+  const ang=KEY_ANGLE[e.key];
+  if(ang===undefined) return;
+  e.preventDefault();
+  const step=steps[currentStep];
+  const arm=step.arms.find(a=>a.state==='active'&&a.a===ang);
+  if(arm) handleAnswer(currentStep,arm);
+});
+
+// ── INIT ───────────────────────────────────────────────────
+renderAllBoards();
+</script>
+</body>
+</html>
