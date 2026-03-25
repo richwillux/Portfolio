@@ -83,7 +83,7 @@ body{font-family:'Nunito',sans-serif;background:#b8ddb8;min-height:100vh;
 .pill-prog{font-size:.78rem;font-weight:800;color:#33691e;}
 .pill-score{color:#1a237e;border-color:#3949ab;background:rgba(57,73,171,.1);font-size:.76rem;}
 .maze-viewport{
-  width:100%;max-width:900px;height:min(490px, calc(100svh - 80px));
+  width:100%;max-width:900px;height:min(490px, calc(100dvh - 90px));
   border:4px solid #2e7d32;border-radius:14px;overflow:hidden;
   box-shadow:0 4px 0 #1b5e20,0 6px 24px rgba(0,0,0,.2);
   position:relative;background:#1a5c1e;}
@@ -308,7 +308,7 @@ function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
 function setupCanvas(){
   const dpr=Math.min(window.devicePixelRatio||1,2);
   cv.style.width=CW+'px'; cv.style.height=CH+'px';
-  cv.width=CW*dpr; cv.height=CH*dpr;
+  cv.width=Math.round(CW*dpr); cv.height=Math.round(CH*dpr);
   C.setTransform(dpr,0,0,dpr,0,0);
   offHedge=document.createElement('canvas');
   offHedge.width=CW; offHedge.height=CH;
@@ -328,8 +328,9 @@ let followAvatar=false; // when true, pan follows avatar position
 function applyPan(){ cv.style.transform='translate('+(-panX)+'px,'+(-panY)+'px)'; }
 
 function panTo(cx2,cy2,instantly){
-  const vw=document.getElementById('viewport').clientWidth||900;
-  const vh=document.getElementById('viewport').clientHeight||490;
+  const vpEl=document.getElementById('viewport');
+  const vw=(vpEl?vpEl.clientWidth:900)||900;
+  const vh=(vpEl?vpEl.clientHeight:490)||490;
   const nx=Math.max(0,Math.min(CW-vw,cx2-vw/2));
   const ny=Math.max(0,Math.min(CH-vh,cy2-vh/2));
   if(instantly){ panX=nx;panY=ny;tX=nx;tY=ny;applyPan();return; }
@@ -339,8 +340,9 @@ function panTo(cx2,cy2,instantly){
 function animatePan(){
   // If following avatar (exit walk), keep updating pan target
   if(followAvatar&&walkQueue.length>0){
-    const vw=document.getElementById('viewport').clientWidth||900;
-    const vh=document.getElementById('viewport').clientHeight||490;
+    const vpEl=document.getElementById('viewport');
+    const vw=(vpEl?vpEl.clientWidth:900)||900;
+    const vh=(vpEl?vpEl.clientHeight:490)||490;
     tX=Math.max(0,Math.min(CW-vw,avatarX-vw/2));
     tY=Math.max(0,Math.min(CH-vh,avatarY-vh/2));
   }
@@ -578,14 +580,17 @@ function buildSteps(){
     jx=nx; jy=ny; // advance to next junction position
   }
 
-  // Exit: push to canvas edge in final direction
+  // Exit: distance depends on screen size — shorter on mobile
   const lastCorrect=steps[9].arms.find(a=>a.c);
   const lcr=lastCorrect.a*Math.PI/180;
   const edx=Math.cos(lcr), edy=Math.sin(lcr);
+  const exitDist=window.innerWidth<500 ? 180 : window.innerWidth<800 ? 300 : null;
   if(Math.abs(edx)>Math.abs(edy)){
-    EXIT_X=edx>0?CW-5:5; EXIT_Y=lastCorrect.ty;
+    EXIT_X=exitDist ? lastCorrect.tx+edx*exitDist : (edx>0?CW-5:5);
+    EXIT_Y=lastCorrect.ty;
   } else {
-    EXIT_X=lastCorrect.tx; EXIT_Y=edy>0?CH-5:5;
+    EXIT_X=lastCorrect.tx;
+    EXIT_Y=exitDist ? lastCorrect.ty+edy*exitDist : (edy>0?CH-5:5);
   }
 }
 
@@ -721,6 +726,9 @@ function drawBlob(ctx,bx,by,r,t,np){
 function bakeHedge(){
   const h=offHedge.getContext('2d');
   h.clearRect(0,0,CW,CH);
+  // Detect mobile for lighter rendering
+  const isMobile=window.innerWidth<500;
+  const isMid=window.innerWidth<800;
 
   // ── Base grass with variation ──────────────────────────────
   h.fillStyle='#3a8c3f'; h.fillRect(0,0,CW,CH);
@@ -742,7 +750,7 @@ function bakeHedge(){
 
   // ── Grass texture (short curved lines) ────────────────────
   h.strokeStyle='#2e7d32'; h.lineWidth=1.5; h.lineCap='round';
-  for(let i=0;i<4000;i++){
+  for(let i=0,gMax=isMobile?800:isMid?2000:4000;i<gMax;i++){
     const gx=ri(0,CW),gy=ri(0,CH);
     const len=ri(4,10),ang=(Math.random()-0.5)*1.2;
     h.beginPath();
@@ -756,7 +764,7 @@ function bakeHedge(){
 
   // ── Dark grass clusters ───────────────────────────────────
   h.strokeStyle='#1b5e20'; h.lineWidth=1.2;
-  for(let i=0;i<2000;i++){
+  for(let i=0,tMax=isMobile?300:isMid?800:2000;i<tMax;i++){
     const gx=ri(0,CW),gy=ri(0,CH);
     h.beginPath();h.moveTo(gx,gy);h.lineTo(gx+ri(-3,3),gy-ri(3,8));
     h.globalAlpha=0.3+Math.random()*0.4; h.stroke();
@@ -765,7 +773,7 @@ function bakeHedge(){
 
   // ── Small flowers ─────────────────────────────────────────
   const flowerCols=['#e91e63','#9c27b0','#2196f3','#ff9800','#fff'];
-  for(let i=0;i<300;i++){
+  for(let i=0,fMax=isMobile?60:isMid?150:300;i<fMax;i++){
     const fx=ri(0,CW),fy=ri(0,CH);
     const fc=flowerCols[ri(0,flowerCols.length-1)];
     h.fillStyle=fc; h.beginPath(); h.arc(fx,fy,ri(2,4),0,Math.PI*2); h.fill();
@@ -773,7 +781,7 @@ function bakeHedge(){
   }
 
   // ── Rocks ─────────────────────────────────────────────────
-  for(let i=0;i<80;i++){
+  for(let i=0,rMax=isMobile?20:isMid?40:80;i<rMax;i++){
     const rx=ri(0,CW),ry=ri(0,CH);
     const rr=ri(6,18);
     // Shadow
@@ -786,14 +794,14 @@ function bakeHedge(){
   }
 
   // ── Trees (top-down view with foliage canopy and trunk shadow) ──
-  for(let i=0;i<140;i++){
+  for(let i=0,treeMax=isMobile?30:isMid?70:140;i<treeMax;i++){
     const tx=ri(0,CW),ty=ri(0,CH);
     const type=ri(0,2); // 0=round, 1=pine, 2=small bush
     drawTopDownTree(h,tx,ty,type,(i*7+tx+ty)%7);
   }
 
   // ── Crystal/plant clusters ─────────────────────────────────
-  for(let i=0;i<120;i++){
+  for(let i=0,crMax=isMobile?20:isMid?50:120;i<crMax;i++){
     const cx=ri(0,CW),cy=ri(0,CH);
     drawCrystalCluster(h,cx,cy,(i*3)%4);
   }
@@ -1357,14 +1365,13 @@ function startGame(diff){
   walkQueue=[];avatarWalking=false;onWalkComplete=null;followAvatar=false;
   // Pan to initial position instantly
   panX=0;panY=0;tX=0;tY=0;
-  // Delay initial pan by one frame so viewport has settled its dimensions
-  render();
   startTimer();
   if(!walkRaf) tickWalk();
-  requestAnimationFrame(()=>{
+  // Wait for layout, then set pan and render
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
     if(JUNCTIONS[0]) panTo(JUNCTIONS[0].jx,JUNCTIONS[0].jy,true);
     render();
-  });
+  }));
 }
 
 function activateStep(s){
