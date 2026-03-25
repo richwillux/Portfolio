@@ -244,7 +244,8 @@ const SAND_DONE='#b5cfa0';
 
 const cv=document.getElementById('mc');
 const C=cv.getContext('2d');
-let offHedge=null;
+let offHedge=null; let hedgeBaked=false;
+let offPath=null; let pathDirty=true; let lastRenderedStep=-1;
 
 // ============================================================
 //  DIFFICULTY CONFIG
@@ -310,8 +311,13 @@ function setupCanvas(){
   cv.style.width=CW+'px'; cv.style.height=CH+'px';
   cv.width=Math.round(CW*dpr); cv.height=Math.round(CH*dpr);
   C.setTransform(dpr,0,0,dpr,0,0);
-  offHedge=document.createElement('canvas');
-  offHedge.width=CW; offHedge.height=CH;
+  if(!offHedge){
+    offHedge=document.createElement('canvas');
+    offHedge.width=Math.round(CW*0.5); offHedge.height=Math.round(CH*0.5);
+  }
+  offPath=document.createElement('canvas');
+  offPath.width=CW; offPath.height=CH;
+  pathDirty=true;
 }
 
 // ============================================================
@@ -375,11 +381,11 @@ function animatePan(){
       // Constant speed walk - simple, no overshoot
       const speed=3.2;
       avatarX+=adx/dist*speed; avatarY+=ady/dist*speed;
-      avatarWalking=true;
+      if(!avatarWalking){ avatarWalking=true; startWalkCycle(); }
     }
   }
 
-  render();
+  render(true);
   if(!panDone || walkQueue.length>0 || avatarWalking){
     panRaf=requestAnimationFrame(animatePan);
   } else {
@@ -658,14 +664,15 @@ function buildPathShape(segments){
     solid.lineTo(x1-px,y1-py);
     solid.closePath();
     // Circle cap at both ends — circles always cover junction gaps regardless of angle
-    solid.moveTo(x1+hw,y1); solid.arc(x1,y1,hw+1,0,Math.PI*2);
-    solid.moveTo(x2+hw,y2); solid.arc(x2,y2,hw+1,0,Math.PI*2);
+    solid.moveTo(x1+hw,y1); solid.arc(x1,y1,hw+2,0,Math.PI*2);
+    solid.moveTo(x2+hw,y2); solid.arc(x2,y2,hw+2,0,Math.PI*2);
   });
   return solid;
 }
 
 // Separate function to draw the wobbly edge overlay (called after solid fill)
-function drawWobblyOverlay(segs){
+function drawWobblyOverlayTo(ctx,segs){
+  const C=ctx; // shadow global C
   const hw=PW/2;
   const jPts=new Set();
   segs.forEach(s=>jPts.add(Math.round(s.x1)+','+Math.round(s.y1)));
@@ -729,8 +736,15 @@ function drawBlob(ctx,bx,by,r,t,np){
 }
 
 function bakeHedge(){
+  if(hedgeBaked) return; // OPT 1: only bake once
+  hedgeBaked=true;
+  // OPT 2: bake at half resolution (CW/2 × CH/2), scale up with drawImage
+  const HW=Math.round(CW*0.5), HH=Math.round(CH*0.5);
+  offHedge.width=HW; offHedge.height=HH;
   const h=offHedge.getContext('2d');
-  h.clearRect(0,0,CW,CH);
+  h.clearRect(0,0,HW,HH);
+  // Scale all coordinates by 0.5 for half-res drawing
+  h.save(); h.scale(0.5,0.5);
   // Detect mobile for lighter rendering
   const isMobile=window.innerWidth<500;
   const isMid=window.innerWidth<800;
@@ -810,6 +824,7 @@ function bakeHedge(){
     const cx=ri(0,CW),cy=ri(0,CH);
     drawCrystalCluster(h,cx,cy,(i*3)%4);
   }
+  h.restore(); // close the 0.5 scale
 }
 
 function drawTopDownTree(h,x,y,type,colorIdx){
@@ -926,58 +941,83 @@ function collectSegments(){
 //  MAIN RENDER
 // ============================================================
 let clickTargets=[];
+let lastFrameTime=0;
+const MIN_FRAME_MS=32; // ~30fps cap when idle; animation loop bypasses this
 
-function render(){
+function render(force){
+  // OPT 6: throttle idle renders to ~30fps
+  if(!force){
+    const now=performance.now();
+    if(now-lastFrameTime < MIN_FRAME_MS) return;
+    lastFrameTime=now;
+  }
   clickTargets=[];
   C.clearRect(0,0,CW,CH);
 
-  // 1. Hedge background
-  C.drawImage(offHedge,0,0);
+  // 1. Hedge background (drawn at full CW×CH from half-res source)
+  C.drawImage(offHedge,0,0,CW,CH);
 
-  // 2. Path shape: solid base (no gaps) then wobbly overlay
-  const segs=collectSegments();
-  const ps=buildPathShape(segs);
-  C.save(); C.fillStyle=SAND; C.fill(ps); C.restore();
-  // Wobbly organic edges on top of solid fill
-  C.save(); drawWobblyOverlay(segs); C.restore();
-
-  // 3. Edge blobs (wall texture) + re-stamp path
-  drawEdgeBlobs(segs,ps);
-
-  // 4. Sandy seal at entry & exit
-  C.fillStyle=SAND;
-  C.fillRect(0,ENTRY_Y-Math.floor(PW/2),ENTRY_X+25,PW);
-  if(currentStep>=10){
-    const lf=steps[9]&&steps[9].arms.find(a=>a.c);
-    const ea=lf?lf.a:0;
-    if(ea===0||ea===180){
-      // Horizontal exit — seal horizontal strip
-      const sx=ea===0?EXIT_X-35:EXIT_X;
-      C.fillRect(sx,EXIT_Y-Math.floor(PW/2),38,PW);
-    } else {
-      // Vertical exit — seal vertical strip
-      const sy=ea===90?EXIT_Y-35:EXIT_Y;
-      C.fillRect(EXIT_X-Math.floor(PW/2),sy,PW,38);
+  // 2+3. Path shape + edge blobs: rebuild only when step changes (OPT 3+5)
+  if(pathDirty){
+    pathDirty=false;
+    const P=offPath.getContext('2d');
+    P.clearRect(0,0,CW,CH);
+    const segs=collectSegments();
+    const ps=buildPathShape(segs);
+    P.save(); P.fillStyle=SAND; P.fill(ps); P.restore();
+    // Sandy underlay circles:
+    // - Current step: all arms (player hasn't answered yet, all need underlay)
+    // - Completed steps: correct arm only (wrong arms have dead-end walls, not circles)
+    P.fillStyle=SAND;
+    if(currentStep<10){
+      steps[currentStep].arms.forEach(arm=>{
+        P.beginPath(); P.arc(arm.tx,arm.ty,CR+14,0,Math.PI*2); P.fill();
+      });
+    }
+    for(let s=0;s<currentStep&&s<10;s++){
+      const fwd=steps[s].arms.find(a=>a.c);
+      if(fwd){ P.beginPath(); P.arc(fwd.tx,fwd.ty,PW/2+4,0,Math.PI*2); P.fill(); }
+    }
+    P.save(); drawWobblyOverlayTo(P,segs); P.restore();
+    drawEdgeBlobsTo(P,segs,ps);
+    // Sandy seal at entry & exit
+    P.fillStyle=SAND;
+    P.fillRect(0,ENTRY_Y-Math.floor(PW/2),ENTRY_X+25,PW);
+    if(currentStep>=10){
+      const lf=steps[9]&&steps[9].arms.find(a=>a.c);
+      const ea=lf?lf.a:0;
+      if(ea===0||ea===180){
+        const sx=ea===0?EXIT_X-35:EXIT_X;
+        P.fillRect(sx,EXIT_Y-Math.floor(PW/2),38,PW);
+      } else {
+        const sy=ea===90?EXIT_Y-35:EXIT_Y;
+        P.fillRect(EXIT_X-Math.floor(PW/2),sy,PW,38);
+      }
+    }
+    // Dead-end walls drawn INTO offPath so they're behind characters/circles
+    // but correctly layered above the hedge background
+    for(let s=0;s<=currentStep&&s<10;s++){
+      const j=JUNCTIONS[s];
+      if(!j) continue;
+      steps[s].arms.forEach(arm=>{
+        if(arm.state!=='wrong') return;
+        const dx=j.jx-arm.tx,dy=j.jy-arm.ty;
+        const d=Math.sqrt(dx*dx+dy*dy)||1;
+        const ux=dx/d,uy=dy/d;
+        for(let ring=0;ring<3;ring++)
+          for(let i=0;i<8;i++){
+            const a=i*Math.PI*2/8;
+            drawBlob(P,arm.tx+ux*ring*8+Math.cos(a)*(PW/2+4),
+                       arm.ty+uy*ring*8+Math.sin(a)*(PW/2+4),13,i%7,7);
+          }
+        drawBlob(P,arm.tx,arm.ty,15,0,7);
+      });
     }
   }
+  // Blit cached path canvas (path + walls — everything below characters)
+  C.drawImage(offPath,0,0);
 
-  // 5. Dead-end walls
-  for(let s=0;s<=currentStep&&s<10;s++){
-    const j=JUNCTIONS[s];
-    steps[s].arms.forEach(arm=>{
-      if(arm.state!=='wrong') return;
-      const dx=j.jx-arm.tx,dy=j.jy-arm.ty;
-      const d=Math.sqrt(dx*dx+dy*dy)||1;
-      const ux=dx/d,uy=dy/d;
-      for(let ring=0;ring<3;ring++)
-        for(let i=0;i<8;i++){
-          const a=i*Math.PI*2/8;
-          drawBlob(C,arm.tx+ux*ring*8+Math.cos(a)*(PW/2+4),
-                     arm.ty+uy*ring*8+Math.sin(a)*(PW/2+4),13,i%7,7);
-        }
-      drawBlob(C,arm.tx,arm.ty,15,0,7);
-    });
-  }
+  // 5. (Dead-end walls now in offPath above)
 
   // 6. Player dot (before circles — circles draw on top)
   drawPlayer(avatarX,avatarY);
@@ -1019,7 +1059,8 @@ function render(){
   if(currentStep>=10) drawGate(EXIT_X,EXIT_Y,true);
 }
 
-function drawEdgeBlobs(segs,ps){
+function drawEdgeBlobsTo(ctx,segs,ps){
+  const C=ctx; // shadow global C
   const hw=PW/2, dist=hw+19;
   segs.forEach(({x1,y1,x2,y2})=>{
     const dx=x2-x1,dy=y2-y1;
@@ -1224,9 +1265,16 @@ function drawQLabel(x,y,text,done){
 // Walking cycle counter
 let walkCycle=0,walkRaf=null;
 function tickWalk(){
-  if(avatarWalking) walkCycle+=0.18;
-  else walkCycle*=0.85; // slow down when stopped
-  walkRaf=requestAnimationFrame(tickWalk);
+  if(avatarWalking){
+    walkCycle+=0.18;
+    walkRaf=requestAnimationFrame(tickWalk);
+  } else {
+    walkCycle*=0.85;
+    walkRaf=null; // stop looping when not walking
+  }
+}
+function startWalkCycle(){
+  // walkCycle RAF starts automatically when walking begins
 }
 
 function drawPlayer(x,y){
@@ -1374,7 +1422,8 @@ function startGame(diff){
   currentStep=0;locked=false;
   buildSteps();
   showScreen('game-screen');
-  setupCanvas();bakeHedge();
+  setupCanvas();
+  bakeHedge(); // no-op after first game
   activateStep(0);updateHUD();
   // Set initial avatar position
   const pos=getPlayerIdlePos(0);
@@ -1395,6 +1444,7 @@ function startGame(diff){
 function activateStep(s){
   if(s>=10) return;
   steps[s].arms.forEach(arm=>{arm.state='active';});
+  pathDirty=true; // arm tips now need their sandy underlay
 }
 
 document.getElementById('win-play-again').onclick=()=>startGame(currentDiff);
@@ -1408,7 +1458,7 @@ function handleAnswer(stepI,arm){
   if(arm.c){
     arm.state='correct';
     step.arms.forEach(a=>{if(a.state==='active')a.state='removed';});
-    streak++;stepIdx++;
+    streak++;stepIdx++;pathDirty=true;
 
     // 3-in-a-row = 5 second time bonus
     if(streak>0&&streak%3===0){
@@ -1453,7 +1503,7 @@ function handleAnswer(stepI,arm){
     });
 
   } else {
-    arm.state='wrong';streak=0;wrongTotal++;
+    arm.state='wrong';streak=0;wrongTotal++;pathDirty=true;
     elapsedSecs+=5; updateTimerDisplay();
     updateHUD();
     showToast('+5 seconds penalty! ❌','wrong');
