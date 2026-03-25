@@ -83,7 +83,7 @@ body{font-family:'Nunito',sans-serif;background:#b8ddb8;min-height:100vh;
 .pill-prog{font-size:.78rem;font-weight:800;color:#33691e;}
 .pill-score{color:#1a237e;border-color:#3949ab;background:rgba(57,73,171,.1);font-size:.76rem;}
 .maze-viewport{
-  width:100%;max-width:900px;height:min(490px, calc(100dvh - 90px));
+  width:100%;max-width:900px;height:490px;
   border:4px solid #2e7d32;border-radius:14px;overflow:hidden;
   box-shadow:0 4px 0 #1b5e20,0 6px 24px rgba(0,0,0,.2);
   position:relative;background:#1a5c1e;}
@@ -327,10 +327,17 @@ let followAvatar=false; // when true, pan follows avatar position
 
 function applyPan(){ cv.style.transform='translate('+(-panX)+'px,'+(-panY)+'px)'; }
 
-function panTo(cx2,cy2,instantly){
+function getVpSize(){
   const vpEl=document.getElementById('viewport');
-  const vw=(vpEl?vpEl.clientWidth:900)||900;
-  const vh=(vpEl?vpEl.clientHeight:490)||490;
+  let vw=vpEl?vpEl.clientWidth:0;
+  let vh=vpEl?vpEl.clientHeight:0;
+  // Fallback if layout hasn't settled
+  if(vw<50) vw=Math.min(window.innerWidth,900);
+  if(vh<50) vh=window.innerHeight-90; // minus HUD
+  return{vw:Math.max(200,vw),vh:Math.max(150,vh)};
+}
+function panTo(cx2,cy2,instantly){
+  const{vw,vh}=getVpSize();
   const nx=Math.max(0,Math.min(CW-vw,cx2-vw/2));
   const ny=Math.max(0,Math.min(CH-vh,cy2-vh/2));
   if(instantly){ panX=nx;panY=ny;tX=nx;tY=ny;applyPan();return; }
@@ -340,9 +347,7 @@ function panTo(cx2,cy2,instantly){
 function animatePan(){
   // If following avatar (exit walk), keep updating pan target
   if(followAvatar&&walkQueue.length>0){
-    const vpEl=document.getElementById('viewport');
-    const vw=(vpEl?vpEl.clientWidth:900)||900;
-    const vh=(vpEl?vpEl.clientHeight:490)||490;
+    const{vw,vh}=getVpSize();
     tX=Math.max(0,Math.min(CW-vw,avatarX-vw/2));
     tY=Math.max(0,Math.min(CH-vh,avatarY-vh/2));
   }
@@ -397,7 +402,7 @@ function walkAvatarAlongPath(waypoints, panTarget, callback){
 
 window.addEventListener('resize',()=>{
   if(document.getElementById('game-screen').classList.contains('active')){
-    const ri2=JUNCTIONS[Math.min(currentStep,9)]; if(ri2) panTo(ri2.jx,ri2.jy,false);
+    const ri2=JUNCTIONS[Math.min(currentStep,9)]; if(ri2){ setViewportHeight(); panTo(ri2.jx,ri2.jy,false); }
   }
 });
 
@@ -1351,6 +1356,18 @@ function getPlayerIdlePos(step){
 // ============================================================
 //  GAME LOGIC
 // ============================================================
+function setViewportHeight(){
+  // Compute safe viewport height accounting for browser chrome on mobile/tablet
+  const vpEl=document.getElementById('viewport');
+  if(!vpEl) return;
+  // Use window.innerHeight minus the HUD bar height
+  const hudEl=document.querySelector('.hud');
+  const hudH=hudEl?hudEl.offsetHeight+8:58;
+  const available=window.innerHeight-hudH-12; // 12px for gap/padding
+  const h=Math.max(200, Math.min(490, available));
+  vpEl.style.height=h+'px';
+}
+
 function startGame(diff){
   currentDiff=diff||currentDiff;
   streak=0;stepIdx=0;wrongTotal=0;
@@ -1367,11 +1384,12 @@ function startGame(diff){
   panX=0;panY=0;tX=0;tY=0;
   startTimer();
   if(!walkRaf) tickWalk();
-  // Wait for layout, then set pan and render
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  // Use setTimeout to ensure CSS layout is fully settled on all devices
+  setTimeout(()=>{
+    setViewportHeight();
     if(JUNCTIONS[0]) panTo(JUNCTIONS[0].jx,JUNCTIONS[0].jy,true);
     render();
-  }));
+  }, 80);
 }
 
 function activateStep(s){
