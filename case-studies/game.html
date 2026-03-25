@@ -971,6 +971,7 @@ function render(force){
     P.fillStyle=SAND;
     if(currentStep<10){
       steps[currentStep].arms.forEach(arm=>{
+        if(arm.state==='wrong') return; // wrong arms get dead-end blobs, not sandy circle
         P.beginPath(); P.arc(arm.tx,arm.ty,CR+14,0,Math.PI*2); P.fill();
       });
     }
@@ -1027,7 +1028,7 @@ function render(force){
     const step=steps[currentStep];
     step.arms.forEach(arm=>{
       if(arm.state==='pending'||arm.state==='removed') return;
-      if(arm.state==='active'||arm.state==='wrong'){
+      if(arm.state==='active'){
         const clickable=arm.state==='active'&&!locked;
         const isHov=hoveredArm===arm;
         drawCircle(arm.tx,arm.ty,arm.answer,arm.state==='wrong'?'wrong':'active',clickable,isHov);
