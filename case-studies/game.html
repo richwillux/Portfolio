@@ -1028,7 +1028,7 @@ function render(force){
     const step=steps[currentStep];
     step.arms.forEach(arm=>{
       if(arm.state==='pending'||arm.state==='removed') return;
-      if(arm.state==='active'){
+      if(arm.state==='active'||arm.state==='wrong'){
         const clickable=arm.state==='active'&&!locked;
         const isHov=hoveredArm===arm;
         drawCircle(arm.tx,arm.ty,arm.answer,arm.state==='wrong'?'wrong':'active',clickable,isHov);
