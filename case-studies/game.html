@@ -1045,13 +1045,20 @@ function render(force){
     if(isDone){
       // Done steps: don't show question — path is clear
     } else {
-      // NPC stands between player and junction — close enough to player
-      // so the speech bubble above them is clear of the answer circles at the junction
+      // NPC stands between player and junction
+      // Don't show question bubble during countdown (locked=true)
       const fx2=s===0?ENTRY_X:JUNCTIONS[s-1].jx;
       const fy2=s===0?ENTRY_Y:JUNCTIONS[s-1].jy;
       const npcX=fx2+(j.jx-fx2)*0.45;
       const npcY=fy2+(j.jy-fy2)*0.45;
-      drawNPC(npcX,npcY,step.qs);
+      if(locked){
+        // Draw NPC character only, no speech bubble
+        const ci=currentStep%7;
+        const faceAngle=Math.atan2(avatarY-npcY, avatarX-npcX);
+        drawTopDownChar(npcX,npcY,NPC_HAIR[ci],NPC_CLOAK[ci],false,faceAngle);
+      } else {
+        drawNPC(npcX,npcY,step.qs);
+      }
     }
   }
 
@@ -1420,26 +1427,95 @@ function setViewportHeight(){
 function startGame(diff){
   currentDiff=diff||currentDiff;
   streak=0;stepIdx=0;wrongTotal=0;
-  currentStep=0;locked=false;
+  currentStep=0;locked=true; // locked during countdown
   buildSteps();
   showScreen('game-screen');
   setupCanvas();
-  bakeHedge(); // no-op after first game
-  activateStep(0);updateHUD();
-  // Set initial avatar position
+  bakeHedge();
+  // Arms stay pending during countdown — don't activate yet
+  updateHUD();
   const pos=getPlayerIdlePos(0);
   avatarX=pos.x;avatarY=pos.y;
   walkQueue=[];avatarWalking=false;onWalkComplete=null;followAvatar=false;
-  // Pan to initial position instantly
   panX=0;panY=0;tX=0;tY=0;
-  startTimer();
-  if(!walkRaf) tickWalk();
-  // Use setTimeout to ensure CSS layout is fully settled on all devices
   setTimeout(()=>{
     setViewportHeight();
     if(JUNCTIONS[0]) panTo(JUNCTIONS[0].jx,JUNCTIONS[0].jy,true);
-    render();
+    render(true);
+    startCountdown();
   }, 80);
+}
+
+// ── Countdown ─────────────────────────────────────────────────
+let countdownRaf=null;
+
+function startCountdown(){
+  const sequence=['5','4','3','2','1','0','GO!'];
+  let idx=0;
+  let phaseStart=null;
+  const GROW_MS=200;
+  const HOLD_MS=700;
+  const FADE_MS=150;
+  const TOTAL_MS=GROW_MS+HOLD_MS+FADE_MS;
+
+  function drawCountdownLabel(text, growProgress, alpha){
+    const size=Math.round(80+growProgress*16); // 80→96px
+    const isGo=(text==='GO!');
+    const col=isGo?'#2e7d32':'#B24A00';
+    const{vw,vh}=getVpSize();
+    const cx=panX+vw/2;
+    const cy=panY+vh/2;
+    C.save();
+    C.globalAlpha=alpha;
+    C.textAlign='center';
+    C.textBaseline='middle';
+    C.font='900 '+size+"px 'Fredoka One', cursive";
+    // White outline for legibility over any background
+    C.strokeStyle='rgba(255,255,255,0.92)';
+    C.lineWidth=size*0.2;
+    C.lineJoin='round';
+    C.strokeText(text,cx,cy);
+    // Drop shadow
+    C.fillStyle='rgba(0,0,0,0.2)';
+    C.fillText(text,cx+3,cy+5);
+    // Main fill
+    C.fillStyle=col;
+    C.fillText(text,cx,cy);
+    C.restore();
+  }
+
+  function tick(now){
+    if(!phaseStart) phaseStart=now;
+    const elapsed=now-phaseStart;
+
+    // Grow: 0→1 over GROW_MS, eased out
+    const growRaw=Math.min(1,elapsed/GROW_MS);
+    const growEased=1-Math.pow(1-growRaw,2);
+
+    // Fade: starts at GROW_MS+HOLD_MS
+    const fadeElapsed=Math.max(0,elapsed-(GROW_MS+HOLD_MS));
+    const alpha=fadeElapsed>0 ? Math.max(0,1-fadeElapsed/FADE_MS) : 1;
+
+    render(true);
+    drawCountdownLabel(sequence[idx],growEased,alpha);
+
+    if(elapsed>=TOTAL_MS){
+      idx++;
+      phaseStart=null;
+      if(idx>=sequence.length){
+        // Done — start game properly
+        countdownRaf=null;
+        activateStep(0);
+        pathDirty=true;
+        locked=false;
+        startTimer();
+        render(true);
+        return;
+      }
+    }
+    countdownRaf=requestAnimationFrame(tick);
+  }
+  countdownRaf=requestAnimationFrame(tick);
 }
 
 function activateStep(s){
